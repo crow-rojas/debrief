@@ -11,7 +11,8 @@
     "types": ["node"],
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
-    "erasableSyntaxOnly": true
+    "erasableSyntaxOnly": true,
+    "resolveJsonModule": true
   },
-  "include": ["src", "test", "vitest.config.ts"]
+  "include": ["src", "test", "vitest.config.ts", "app/i18n/*.json"]
 }
