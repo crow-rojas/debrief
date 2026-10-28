@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs"
+import { delimiter, join } from "node:path"
 import type { AgentName } from "../capture/event.ts"
 import type { Config } from "../config.ts"
 import type { GeneratorConfig } from "./run.ts"
@@ -55,4 +57,15 @@ export function pickGenerator(
   if (installed.includes(agent)) return presets[agent]
   const other = installed[0]
   return other ? presets[other] : null
+}
+
+const BINARIES: Record<AgentName, string> = { "claude-code": "claude", codex: "codex" }
+
+// Which agents' CLIs are on PATH.
+export function installedAgents(path = process.env.PATH ?? ""): AgentName[] {
+  const dirs = path.split(delimiter).filter(Boolean)
+  const exts = process.platform === "win32" ? ["", ".cmd", ".exe"] : [""]
+  return (Object.keys(BINARIES) as AgentName[]).filter((agent) =>
+    dirs.some((dir) => exts.some((ext) => existsSync(join(dir, BINARIES[agent] + ext)))),
+  )
 }
