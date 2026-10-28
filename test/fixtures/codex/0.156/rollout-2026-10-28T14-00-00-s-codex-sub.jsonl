@@ -1,0 +1,5 @@
+{"ordinal": 1, "timestamp": "2026-10-28T12:00:00.000Z", "type": "session_meta", "payload": {"id": "s-codex-sub", "session_id": "s-codex-sub", "timestamp": "2026-10-28T12:00:00.000Z", "cwd": "/home/user/toy", "originator": "codex-tui", "cli_version": "0.156.1", "source": {"subagent": {"thread_spawn": {}}}, "history_mode": "paginated", "base_instructions": {"text": "toy"}, "git": {}}}
+{"ordinal": 2, "timestamp": "2026-10-28T14:00:01.000Z", "type": "event_msg", "payload": {"type": "task_started", "turn_id": "b1", "started_at": 0}}
+{"ordinal": 3, "timestamp": "2026-10-28T14:00:01.100Z", "type": "response_item", "payload": {"type": "message", "role": "user", "id": "m", "content": [{"type": "input_text", "text": "Do part of the work"}]}}
+{"ordinal": 4, "timestamp": "2026-10-28T14:00:02.000Z", "type": "response_item", "payload": {"type": "message", "role": "assistant", "id": "m", "content": [{"type": "output_text", "text": "Done"}]}}
+{"ordinal": 5, "timestamp": "2026-10-28T14:00:03.000Z", "type": "event_msg", "payload": {"type": "task_complete", "turn_id": "b1", "last_agent_message": "x", "started_at": 0, "completed_at": 0, "duration_ms": 1}}

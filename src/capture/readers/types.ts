@@ -19,7 +19,22 @@ export interface Reader {
 
 export type Line = { text: string; start: number; end: number }
 
-// The complete lines of a file from a byte offset; a trailing line without "\n" is left out.
+// The complete lines of a buffer that starts at byte offset; a trailing line without "\n" is left out.
+export function linesOf(buffer: Buffer, offset = 0): Line[] {
+  const lines: Line[] = []
+  let start = 0
+  for (let nl = buffer.indexOf(10); nl !== -1; nl = buffer.indexOf(10, start)) {
+    lines.push({
+      text: buffer.toString("utf8", start, nl),
+      start: offset + start,
+      end: offset + nl + 1,
+    })
+    start = nl + 1
+  }
+  return lines
+}
+
+// The complete lines of a file from a byte offset.
 export async function readLines(file: string, offset: number): Promise<Line[]> {
   const handle = await open(file, "r")
   try {
@@ -27,17 +42,7 @@ export async function readLines(file: string, offset: number): Promise<Line[]> {
     if (offset >= size) return []
     const buffer = Buffer.alloc(size - offset)
     await handle.read(buffer, 0, buffer.length, offset)
-    const lines: Line[] = []
-    let start = 0
-    for (let nl = buffer.indexOf(10); nl !== -1; nl = buffer.indexOf(10, start)) {
-      lines.push({
-        text: buffer.toString("utf8", start, nl),
-        start: offset + start,
-        end: offset + nl + 1,
-      })
-      start = nl + 1
-    }
-    return lines
+    return linesOf(buffer, offset)
   } finally {
     await handle.close()
   }
