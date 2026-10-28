@@ -1,8 +1,8 @@
-# debrief
+# ownship
 
 Understand what your coding agent ships under your name.
 
-While your agent works, debrief turns the code it just wrote into short exercises about your own diff, schedules them with spaced repetition and serves them to your phone. It runs on your machine, works with any agent and keeps your code local.
+While your agent works, ownship turns the code it just wrote into short exercises about your own diff, schedules them with spaced repetition and serves them to your phone. It runs on your machine, works with any agent and keeps your code local.
 
 **Status:** idea stage. Nothing to install yet.
 
