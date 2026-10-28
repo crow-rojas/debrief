@@ -1,3 +1,4 @@
+import type { DatabaseSync } from "node:sqlite"
 import { execFileSync } from "node:child_process"
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
@@ -39,4 +40,42 @@ export function makeRepo(files?: Record<string, string>): string {
     git(root, "commit", "-q", "-m", "chore: base")
   }
   return root
+}
+
+// Inserts a queued turn (with an empty-diff event in worktree) and returns its row id.
+export function insertTurn(
+  db: DatabaseSync,
+  endedAt: string,
+  worktree = "/w",
+  turnId = `t-${endedAt}`,
+): number {
+  const event = {
+    schema: "ownship.turn/1",
+    agent: { name: "codex", version: "0.156.1" },
+    reader: { id: "codex", version: 1, source: "x", offset: 0 },
+    sessionId: "s",
+    turnId,
+    origin: "interactive",
+    ts: { start: endedAt, end: endedAt },
+    status: "completed",
+    prompt: "Explain the import",
+    messages: ["The import runs inside one transaction."],
+    repo: {
+      worktree,
+      commonDir: `${worktree}/.git`,
+      slug: "w-00000000",
+      branch: "main",
+      base: "",
+      head: "",
+    },
+    changes: [],
+    merged: false,
+  }
+  const result = db
+    .prepare(
+      `INSERT INTO turns (agent, session_id, turn_id, worktree, common_dir, slug, ended_at, status, state, event_json)
+       VALUES ('codex', 's', ?, ?, ?, 'w-00000000', ?, 'completed', 'queued', ?)`,
+    )
+    .run(turnId, worktree, `${worktree}/.git`, endedAt, JSON.stringify(event))
+  return Number(result.lastInsertRowid)
 }
