@@ -79,14 +79,16 @@ The unit is the **turn** (the agent finishing and handing control back), not the
   "schema": "ownship.turn/1",
   "agent": { "name": "codex", "version": "0.165.0" },
   "reader": { "id": "codex", "version": 1, "source": "<log path>", "offset": 123456 },
-  "sessionId": "…", "turnId": "…",
-  "origin": "interactive",            // interactive | headless | ownship; only interactive is processed
+  "sessionId": "…",
+  "turnId": "…",
+  "origin": "interactive", // interactive | headless | ownship; only interactive is processed
   "repo": { "root": "/…", "branch": "main", "base": "<tree-sha>", "head": "<tree-sha>" },
-  "ts": { "start": "…", "end": "…" }, "status": "completed",  // completed | interrupted | error
+  "ts": { "start": "…", "end": "…" },
+  "status": "completed", // completed | interrupted | error
   "prompt": "…",
   "messages": ["…"],
-  "changes": [{ "path": "app/models/supplier.py", "op": "modify", "patch": "…" }],  // from git snapshots
-  "merged": false                     // true when catch-up merged several missed turns
+  "changes": [{ "path": "app/models/supplier.py", "op": "modify", "patch": "…" }], // from git snapshots
+  "merged": false, // true when catch-up merged several missed turns
 }
 ```
 
@@ -97,7 +99,7 @@ Left out of v1: tool outputs, reasoning, images, attribution, subagent linking, 
 - **The generator is the user's own agent**, run headless from a command template in the config. ownship ships two presets and picks the one that is installed, preferring the agent that produced the turn:
   - `claude -p --no-session-persistence --tools "" --output-format json --json-schema <schema>`
   - `codex exec --ephemeral --disable hooks -s read-only --output-schema <schema>`
-  The anti-recursion flags are part of the presets, not left to the user. Every run sets `OWNSHIP_GENERATING=1`, and readers drop any session whose origin is headless or ownship. Any other command (Ollama, another CLI) can be configured; output is validated against the schema and retried once.
+    The anti-recursion flags are part of the presets, not left to the user. Every run sets `OWNSHIP_GENERATING=1`, and readers drop any session whose origin is headless or ownship. Any other command (Ollama, another CLI) can be configured; output is validated against the schema and retried once.
 - **Input** per turn: the filtered prompt, messages and patches, plus the repo's knowledge notes. Before anything is sent: drop files matched by `.gitignore` or `.ownshipignore`, lockfiles and generated files, then secret-scan and drop any hunk with a finding.
 - **Research mode** (off by default, enabled per repo in the config) runs the generator with its tools on, so it can read the repo, search the web and reach internal docs through the user's own MCP setup. Off means the generator sees only what ownship gives it. **(builder's call)** Research only shapes the question and the explanation: evidence must still come from the turn, and nothing the generator read elsewhere is stored or sent to the phone.
 - **Eligible turns**: only `completed` ones; `interrupted` and `error` turns are dropped. Turns with no code changes (planning, "explain this", design discussions) are eligible too, because that is where the reasoning the user is asked about in reviews lives; for them, evidence comes from the prompt and messages.
@@ -109,12 +111,12 @@ Left out of v1: tool outputs, reasoning, images, attribution, subagent linking, 
 
 Four kinds, mixed within a session. All share one rule: **every card carries evidence** (one or more quotes from the turn's patch, prompt or messages, with file and line for code), and the daemon checks deterministically that each quote appears in the turn (whitespace-normalized). A card without verifiable evidence is discarded before it is stored.
 
-| Kind | What the user does | Graded by | FSRS rating |
-|---|---|---|---|
+| Kind                | What the user does                                                                                                                                | Graded by                                                                                                                                                    | FSRS rating                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
 | Defend the decision | Writes a free answer to "why X and not Y?" about a real decision, then sees the reference as 2 or 3 key ideas and ticks the ones their answer had | The user ticking key ideas (self-scoring against idea units reduces the leniency of self-grading, Rawson and Dunlosky; **cite verified sources in the ADR**) | All ticked: Good. Any missing: Again |
-| Multiple choice | Picks one of 3 or 4 options; exactly one is correct | Key | Right: Good. Wrong: Again |
-| Short text | Types a short answer | A list of accepted answers, compared case-, accent- and whitespace-insensitive | Same |
-| Number | Types a number | Value with an optional tolerance | Same |
+| Multiple choice     | Picks one of 3 or 4 options; exactly one is correct                                                                                               | Key                                                                                                                                                          | Right: Good. Wrong: Again            |
+| Short text          | Types a short answer                                                                                                                              | A list of accepted answers, compared case-, accent- and whitespace-insensitive                                                                               | Same                                 |
+| Number              | Types a number                                                                                                                                    | Value with an optional tolerance                                                                                                                             | Same                                 |
 
 - "I don't know, show me" counts as Again. "Not now" removes the card from the current session without rating it.
 - Feedback is immediate and sits next to the highlighted code.
