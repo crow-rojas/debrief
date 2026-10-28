@@ -10,7 +10,8 @@
     "skipLibCheck": true,
     "types": ["node"],
     "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true
   },
   "include": ["src", "test", "vitest.config.ts"]
 }

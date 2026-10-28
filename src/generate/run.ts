@@ -15,11 +15,11 @@ export type GeneratorConfig = {
 }
 
 export class GeneratorError extends Error {
-  constructor(
-    readonly reason: "missing" | "timeout" | "exit" | "invalid",
-    message: string,
-  ) {
+  readonly reason: "missing" | "timeout" | "exit" | "invalid"
+
+  constructor(reason: GeneratorError["reason"], message: string) {
     super(message)
+    this.reason = reason
   }
 }
 
