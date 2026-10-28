@@ -4,17 +4,42 @@
   "description": "Understand what your coding agent ships under your name.",
   "license": "Apache-2.0",
   "type": "module",
+  "bin": {
+    "ownship": "dist/src/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22.15.0"
   },
   "packageManager": "pnpm@11.25.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crow-rojas/ownship.git"
+  },
+  "keywords": [
+    "coding-agent",
+    "claude-code",
+    "codex",
+    "spaced-repetition",
+    "fsrs",
+    "learning"
+  ],
   "scripts": {
     "test": "vitest run",
     "lint": "eslint --max-warnings 0 .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "build": "vite build && tsc -p tsconfig.build.json",
-    "dev:app": "vite"
+    "dev:app": "vite",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "qrcode-terminal": "0.12.0",
+    "ts-fsrs": "^5.4.2"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -38,9 +63,5 @@
     "vue-i18n": "11.4.16",
     "vue-tsc": "3.3.13",
     "yaml-eslint-parser": "^2.1.0"
-  },
-  "dependencies": {
-    "qrcode-terminal": "0.12.0",
-    "ts-fsrs": "^5.4.2"
   }
 }
