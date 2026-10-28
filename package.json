@@ -12,18 +12,32 @@
     "test": "vitest run",
     "lint": "eslint --max-warnings 0 .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "dev:app": "vite"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@intlify/eslint-plugin-vue-i18n": "^4.5.1",
     "@types/node": "^22.20.5",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "2.5.1",
     "eslint": "10.13.0",
+    "eslint-plugin-vue": "^10.12.0",
     "globals": "17.13.0",
+    "happy-dom": "^21.0.4",
+    "jsonc-eslint-parser": "^3.3.0",
     "lefthook": "2.2.1",
     "prettier": "3.9.10",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "5.0.5"
+    "vite": "^8.3.5",
+    "vitest": "5.0.5",
+    "vue": "3.5.44",
+    "vue-eslint-parser": "^10.4.1",
+    "vue-i18n": "11.4.16",
+    "vue-tsc": "3.3.13",
+    "yaml-eslint-parser": "^2.1.0"
   },
   "dependencies": {
     "qrcode-terminal": "0.12.0",

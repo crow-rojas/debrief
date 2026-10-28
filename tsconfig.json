@@ -14,5 +14,6 @@
     "erasableSyntaxOnly": true,
     "resolveJsonModule": true
   },
-  "include": ["src", "test", "vitest.config.ts", "app/i18n/*.json"]
+  "include": ["src", "test", "vitest.config.ts", "app/i18n/*.json"],
+  "exclude": ["test/app"]
 }

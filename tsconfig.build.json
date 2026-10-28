@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "rewriteRelativeImportExtensions": true,
+    "declaration": false
+  },
+  "include": ["src", "app/i18n/*.json", "package.json"],
+  "exclude": ["test", "app/**/*.ts", "app/**/*.vue"]
+}
