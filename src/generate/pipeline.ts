@@ -1,6 +1,7 @@
 import type { DatabaseSync } from "node:sqlite"
 import { storeCards } from "../cards/store.ts"
 import type { Config } from "../config.ts"
+import { readNotes } from "../knowledge/notes.ts"
 import { filterTurn } from "./filter.ts"
 import { installedAgents, pickGenerator } from "./presets.ts"
 import { buildPrompt } from "./prompt.ts"
@@ -23,7 +24,7 @@ export async function runPipelineOnce(
     const generator = pickGenerator(config, turn.agent, installedAgents())
     if (!generator) throw new Error("missing: neither claude nor codex is on PATH")
     const filtered = await filterTurn(turn.event)
-    const prompt = buildPrompt(filtered, deps.notes?.(turn.slug) ?? [], config.language)
+    const prompt = buildPrompt(filtered, (deps.notes ?? readNotes)(turn.slug), config.language)
     const research = config.repos[turn.slug]?.research === true
     const output = await (deps.run ?? runGenerator)(generator, prompt, {
       research,
