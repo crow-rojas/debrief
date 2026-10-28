@@ -15,6 +15,7 @@ ownship handles company code. It must be safe on a work laptop, reachable from t
 **What reaches an LLM**: only what the user's own agent receives as generator input, filtered as ADR-004 describes. Research mode, off by default and enabled per repo, is the only way the generator reads more. Every repo is captured by default; an `exclude` list in the config leaves repos out.
 
 **Access**:
+
 - The daemon binds to `127.0.0.1`. Every request needs the pairing token, including on localhost, because `tailscale serve` traffic arrives from `127.0.0.1`.
 - `ownship pair` shows a QR with the URL and a long-lived token, kept by the browser in a cookie. Strict CORS and CSRF, and an access log.
 - If Tailscale is installed, pairing offers `tailscale serve` first: HTTPS inside the user's tailnet. Otherwise it binds the LAN IP over plain HTTP and warns that it is for trusted networks only.

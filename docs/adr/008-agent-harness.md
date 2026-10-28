@@ -12,12 +12,12 @@ Agents will write most of ownship. Their usual failures are silencing a check, d
 
 Port the starter's harness, translated to Node:
 
-| Moment | What runs |
-|---|---|
-| After each agent edit | ESLint then Prettier on that file, autocorrecting |
-| `git commit` (lefthook) | Linters on staged files, gitleaks on the staged diff, Conventional Commits, no AI co-author trailers |
-| End of each agent turn (Claude Code Stop hook, `.codex/hooks.json`) | `bin/check`: ESLint, `tsc`, `vue-tsc`, tests, `bin/guard` |
-| `git push` and GitHub Actions | `bin/ci`; pushes to `main` refused |
+| Moment                                                              | What runs                                                                                            |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| After each agent edit                                               | ESLint then Prettier on that file, autocorrecting                                                    |
+| `git commit` (lefthook)                                             | Linters on staged files, gitleaks on the staged diff, Conventional Commits, no AI co-author trailers |
+| End of each agent turn (Claude Code Stop hook, `.codex/hooks.json`) | `bin/check`: ESLint, `tsc`, `vue-tsc`, tests, `bin/guard`                                            |
+| `git push` and GitHub Actions                                       | `bin/ci`; pushes to `main` refused                                                                   |
 
 - `CLAUDE.md` identical to `AGENTS.md`: an index where each rule names the tool that enforces it.
 - `bin/guard` in Node: fails when the test count drops, new skips appear, or the harness changes without a human `Guard-Override:` trailer.
