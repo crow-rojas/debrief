@@ -80,7 +80,11 @@ describe("filterTurn", () => {
 
   it("removes a hunk with an AWS key and keeps the rest of the file", async () => {
     const repo = makeRepo()
-    const p = patch("settings.py", [`AWS_KEY = "${"AKIA"}${"ABCDEFGHIJKLMNOP"}"`], [["DEBUG = False"]])
+    const p = patch(
+      "settings.py",
+      [`AWS_KEY = "${"AKIA"}${"ABCDEFGHIJKLMNOP"}"`],
+      [["DEBUG = False"]],
+    )
     const out = await filterTurn(event(repo, [change("settings.py", p)]))
     expect(out.changes).toHaveLength(1)
     expect(out.changes[0]?.patch).not.toContain("AKIA")
