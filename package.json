@@ -1,0 +1,28 @@
+{
+  "name": "ownship",
+  "version": "0.0.0",
+  "description": "Understand what your coding agent ships under your name.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint --max-warnings 0 .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "10.13.0",
+    "globals": "17.13.0",
+    "lefthook": "2.2.1",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}

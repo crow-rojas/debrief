@@ -1,0 +1,37 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: eslint and prettier
+      glob: "*.{js,mjs,ts,vue}"
+      group:
+        piped: true
+        jobs:
+          - run: pnpm exec eslint --cache --fix --max-warnings 0 --no-warn-ignored {staged_files}
+          - run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+    - name: prettier for styles and data
+      glob: "*.{css,json,md,yml,yaml}"
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+    - name: gitleaks
+      run: command -v gitleaks >/dev/null || { echo "gitleaks is not installed; CI will scan."; exit 0; }; gitleaks git --pre-commit --staged --redact --no-banner
+
+commit-msg:
+  jobs:
+    - name: conventional commit
+      run: |
+        head -1 {1} | grep -Eq '^((build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9-]+\))?!?: .+|Merge |Revert "|(fixup|squash|amend)! )' || { echo "Use a Conventional Commit subject, e.g. 'feat: add readers'."; exit 1; }
+    - name: no AI co-authors
+      run: |
+        ! grep -qiE '^co-authored-by:.*(claude|anthropic|openai|codex|copilot|cursor|gemini)' {1} || { echo 'Remove the AI co-author trailer.'; exit 1; }
+
+# A fast way to hear about a mistake, not the gate: GitHub's branch protection on main and CI are.
+pre-push:
+  piped: true
+  jobs:
+    - name: block-main
+      run: |
+        ! grep -q ' refs/heads/main ' || { echo 'Open a pull request instead of pushing to main.'; exit 1; }
+      use_stdin: true
+    - name: ci
+      run: bin/ci
