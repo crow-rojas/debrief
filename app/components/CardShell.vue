@@ -1,0 +1,65 @@
+<script setup lang="ts">
+import { computed, ref } from "vue"
+import { useI18n } from "vue-i18n"
+import type { FlagInput, SessionCard } from "../api.ts"
+import FlagSheet from "./FlagSheet.vue"
+
+const props = defineProps<{ card: SessionCard; position: number; total: number }>()
+const emit = defineEmits<{ notNow: []; flag: [input: FlagInput] }>()
+const { t, locale } = useI18n()
+const flagging = ref(false)
+
+const ago = computed(() => {
+  const minutes = Math.round((new Date(props.card.endedAt).getTime() - Date.now()) / 60_000)
+  const format = new Intl.RelativeTimeFormat(locale.value, { numeric: "auto" })
+  if (Math.abs(minutes) < 60) return format.format(minutes, "minute")
+  if (Math.abs(minutes) < 60 * 24) return format.format(Math.round(minutes / 60), "hour")
+  return format.format(Math.round(minutes / 1440), "day")
+})
+const repo = computed(() => props.card.repo.replace(/-[0-9a-f]{8}$/, ""))
+const code = computed(() => props.card.evidence.filter((e) => e.source === "patch"))
+const quotes = computed(() => props.card.evidence.filter((e) => e.source !== "patch"))
+const kind = computed(() => {
+  switch (props.card.kind) {
+    case "defend":
+      return t("app.kind.defend")
+    case "choice":
+      return t("app.kind.choice")
+    case "text":
+      return t("app.kind.text")
+    default:
+      return t("app.kind.number")
+  }
+})
+</script>
+
+<template>
+  <article class="card">
+    <header class="card-top">
+      <span>{{ t("app.card.meta", { repo, ago }) }}</span>
+      <span>{{ t("app.progress", { n: position, total }) }}</span>
+    </header>
+    <p class="kind">{{ kind }}</p>
+    <h1 class="question">{{ card.question }}</h1>
+    <figure v-for="(e, i) in code" :key="`c${i}`" class="evidence">
+      <figcaption v-if="e.path">{{ e.path }}</figcaption>
+      <pre><code><span v-for="(line, j) in e.quote.split('\n')" :key="j" class="hl">{{ line }}</span></code></pre>
+    </figure>
+    <blockquote v-for="(e, i) in quotes" :key="`q${i}`" class="quote">
+      <span class="quote-source">{{
+        e.source === "prompt" ? t("app.card.fromPrompt") : t("app.card.fromMessage")
+      }}</span>
+      {{ e.quote }}
+    </blockquote>
+    <slot />
+    <FlagSheet v-if="flagging" @cancel="flagging = false" @submit="emit('flag', $event)" />
+    <footer v-else class="card-actions">
+      <button type="button" class="link danger" data-test="flag" @click="flagging = true">
+        {{ t("app.card.wrong") }}
+      </button>
+      <button type="button" class="link" data-test="not-now" @click="emit('notNow')">
+        {{ t("app.card.notNow") }}
+      </button>
+    </footer>
+  </article>
+</template>

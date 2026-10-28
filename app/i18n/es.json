@@ -1,6 +1,6 @@
 {
   "cli": {
-    "usage": "Uso: ownship <init | start | status | pair>",
+    "usage": "Uso: ownship init | start | status | pair",
     "nodeTooOld": "ownship necesita Node {required} o más nuevo; este es Node {current}. Actualiza Node y vuelve a correr init.",
     "noAgents": "No encontré claude ni codex en el PATH. Instala alguno; ownship genera las tarjetas con él.",
     "agentsFound": "Encontré: {agents}.",
@@ -21,5 +21,55 @@
     "lanWarning": "Esto usa HTTP sin cifrar: cualquiera en la misma red puede leer tus tarjetas. Úsalo solo en redes de confianza, o instala Tailscale.",
     "noNetwork": "No encontré Tailscale ni una dirección de red local, así que no hay por dónde emparejar.",
     "scan": "Escanea este código con tu teléfono, o abre el enlace:"
+  },
+  "app": {
+    "loading": "Cargando tarjetas…",
+    "error": "No pude cargar las tarjetas. Revisa que el daemon de ownship esté corriendo.",
+    "progress": "{n} de {total}",
+    "kind": {
+      "defend": "Defiende la decisión",
+      "choice": "Alternativas",
+      "text": "Respuesta corta",
+      "number": "Número"
+    },
+    "empty": {
+      "title": "Estás al día",
+      "body": "Las tarjetas nuevas aparecen después de los próximos turnos de tu agente."
+    },
+    "unpaired": {
+      "title": "Este dispositivo no está emparejado",
+      "body": "Corre ownship pair en tu computador y escanea el código."
+    },
+    "card": {
+      "notNow": "Ahora no",
+      "wrong": "Esta tarjeta está mal",
+      "next": "Siguiente",
+      "dontKnow": "No sé, muéstrame",
+      "check": "Revisar",
+      "right": "Correcto",
+      "notQuite": "No del todo",
+      "accepted": "Respuesta aceptada: {answer}",
+      "fromPrompt": "Tu prompt",
+      "fromMessage": "El agente dijo",
+      "meta": "{repo} · {ago}"
+    },
+    "defend": {
+      "placeholder": "Explícalo con tus palabras",
+      "reveal": "Ver la respuesta",
+      "tick": "Marca las ideas que tenías en tu respuesta:"
+    },
+    "text": {
+      "placeholder": "Tu respuesta"
+    },
+    "number": {
+      "placeholder": "Un número"
+    },
+    "flag": {
+      "title": "¿Qué está mal en esta tarjeta?",
+      "note": "Lo que en realidad es cierto (opcional)",
+      "discard": "Descartar",
+      "regenerate": "Regenerar con mi nota",
+      "cancel": "Cancelar"
+    }
   }
 }

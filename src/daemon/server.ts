@@ -132,7 +132,7 @@ function serveStatic(res: http.ServerResponse, staticDir: string, pathname: stri
     .end(readFileSync(file))
 }
 
-export function createServer(db: DatabaseSync, _config: Config, opts: Options): http.Server {
+export function createServer(db: DatabaseSync, config: Config, opts: Options): http.Server {
   return http.createServer(async (req, res) => {
     const url = new URL(req.url ?? "/", "http://ownship.local")
     res.on("finish", () => {
@@ -166,6 +166,9 @@ export function createServer(db: DatabaseSync, _config: Config, opts: Options): 
       if (req.method === "POST" && req.headers["x-ownship"] !== "1") return send(res, 403)
 
       const now = new Date()
+      if (req.method === "GET" && url.pathname === "/api/settings") {
+        return send(res, 200, { language: config.language })
+      }
       if (req.method === "GET" && url.pathname === "/api/session") {
         const limit = Math.min(Number(url.searchParams.get("limit") ?? 5) || 5, 50)
         return send(res, 200, { cards: session(db, limit, now) })

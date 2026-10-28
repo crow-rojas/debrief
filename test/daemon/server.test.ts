@@ -74,6 +74,12 @@ describe("daemon server", () => {
     })
   })
 
+  it("reports the configured language", async () => {
+    expect(await (await fetch(`${base}/api/settings`, { headers: auth })).json()).toEqual({
+      language: "en",
+    })
+  })
+
   it("rejects a POST without X-Ownship", async () => {
     const res = await post(
       "/api/cards/1/answer",

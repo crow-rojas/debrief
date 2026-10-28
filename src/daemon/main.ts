@@ -1,4 +1,4 @@
-import { appendFileSync, existsSync, rmSync, writeFileSync } from "node:fs"
+import { appendFileSync, rmSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { catchUp, processFile, watch } from "../capture/capture.ts"
 import { claudeCodeReader } from "../capture/readers/claude-code.ts"
@@ -16,10 +16,10 @@ function log(message: string): void {
   appendFileSync(homePath("daemon.log"), `${new Date().toISOString()} ${message}\n`)
 }
 
-// The built review app ships in dist/app next to the compiled daemon; from source it is dist/app too.
+// The built review app lives in dist/app: next to dist/src once compiled, under the repo from source.
 function staticDir(): string {
-  const built = fileURLToPath(new URL("../app/", import.meta.url))
-  return existsSync(built) ? built : fileURLToPath(new URL("../../dist/app/", import.meta.url))
+  const fromSource = import.meta.url.endsWith(".ts")
+  return fileURLToPath(new URL(fromSource ? "../../dist/app/" : "../../app/", import.meta.url))
 }
 
 export async function startDaemon(): Promise<void> {

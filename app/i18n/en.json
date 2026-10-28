@@ -1,6 +1,6 @@
 {
   "cli": {
-    "usage": "Usage: ownship <init | start | status | pair>",
+    "usage": "Usage: ownship init | start | status | pair",
     "nodeTooOld": "ownship needs Node {required} or newer; this is Node {current}. Upgrade Node and run init again.",
     "noAgents": "Neither claude nor codex is on PATH. Install one of them; ownship generates cards with it.",
     "agentsFound": "Found: {agents}.",
@@ -21,5 +21,55 @@
     "lanWarning": "This uses plain HTTP: anyone on the same network can read your cards. Use it only on networks you trust, or install Tailscale.",
     "noNetwork": "No Tailscale and no local network address found, so there is nothing to pair over.",
     "scan": "Scan this code with your phone, or open the link:"
+  },
+  "app": {
+    "loading": "Loading cards…",
+    "error": "Couldn't load cards. Check that the ownship daemon is running.",
+    "progress": "{n} of {total}",
+    "kind": {
+      "defend": "Defend the decision",
+      "choice": "Multiple choice",
+      "text": "Short answer",
+      "number": "Number"
+    },
+    "empty": {
+      "title": "You're all caught up",
+      "body": "New cards appear after your agent's next turns."
+    },
+    "unpaired": {
+      "title": "This device isn't paired",
+      "body": "Run ownship pair on your computer and scan the code."
+    },
+    "card": {
+      "notNow": "Not now",
+      "wrong": "This card is wrong",
+      "next": "Next",
+      "dontKnow": "I don't know, show me",
+      "check": "Check",
+      "right": "Right",
+      "notQuite": "Not quite",
+      "accepted": "Accepted answer: {answer}",
+      "fromPrompt": "Your prompt",
+      "fromMessage": "The agent said",
+      "meta": "{repo} · {ago}"
+    },
+    "defend": {
+      "placeholder": "Explain it in your own words",
+      "reveal": "See the answer",
+      "tick": "Tick the ideas your answer had:"
+    },
+    "text": {
+      "placeholder": "Your answer"
+    },
+    "number": {
+      "placeholder": "A number"
+    },
+    "flag": {
+      "title": "What's wrong with this card?",
+      "note": "What is actually true (optional)",
+      "discard": "Discard",
+      "regenerate": "Regenerate with my note",
+      "cancel": "Cancel"
+    }
   }
 }
