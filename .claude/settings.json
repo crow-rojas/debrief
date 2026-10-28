@@ -1,0 +1,61 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bin/check)",
+      "Bash(bin/ci)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm vitest*)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm format)",
+      "Bash(pnpm typecheck)"
+    ],
+    "deny": [
+      "Read(~/.claude/.credentials.json)",
+      "Read(~/.codex/auth.json)",
+      "Bash(git push --force *)",
+      "Bash(git push * --force)",
+      "Bash(git push * --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push * -f)",
+      "Bash(git push * -f *)",
+      "Bash(git push -uf *)",
+      "Bash(git push * +*)",
+      "Bash(npm install*)",
+      "Bash(npm i *)",
+      "Bash(yarn *)",
+      "Bash(* --no-veri*)",
+      "Bash(git commit -n*)",
+      "Bash(git commit * -n*)",
+      "Bash(*LEFTHOOK=0*)",
+      "Bash(*LEFTHOOK_EXCLUDE*)",
+      "Bash(*core.hooksPath*)",
+      "Bash(*lefthook uninstall*)",
+      "Bash(*Guard-Override*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/lint-edited-file",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-on-stop",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+// Stop: keep the agent working until bin/check is green (exit 2 sends the failure back).
+// Skips trees that already passed, and lets the agent stop on a second failed attempt.
+// Any error in this script also exits 2: a hook that crashes must not wave the turn through.
+import { execFileSync, spawnSync } from "node:child_process"
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
+try {
+  if (JSON.parse(readFileSync(0, "utf8") || "{}").stop_hook_active) process.exit(0)
+  process.chdir(execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim())
+
+  // The tree the working copy would commit, untracked files included, without touching the real index.
+  const dir = mkdtempSync(join(tmpdir(), "ownship-check-"))
+  const env = { ...process.env, GIT_INDEX_FILE: join(dir, "index") }
+  execFileSync("git", ["read-tree", "HEAD"], { env })
+  execFileSync("git", ["add", "--all"], { env })
+  const tree = execFileSync("git", ["write-tree"], { env, encoding: "utf8" }).trim()
+  rmSync(dir, { recursive: true, force: true })
+
+  const marker = "tmp/agent-check-passed"
+  if (existsSync(marker) && readFileSync(marker, "utf8") === tree) process.exit(0)
+
+  const run = spawnSync("bin/check", { encoding: "utf8" })
+  if (run.status === 0) {
+    mkdirSync("tmp", { recursive: true })
+    writeFileSync(marker, tree)
+    process.exit(0)
+  }
+  const output = `${run.stdout}${run.stderr}`.split("\n").slice(-60).join("\n")
+  console.error(`bin/check failed. Fix the cause; do not weaken the check.\n\n${output}`)
+  process.exit(2)
+} catch (error) {
+  console.error(
+    `The stop hook could not run bin/check (${error.message}). Run bin/check yourself before finishing.`,
+  )
+  process.exit(2)
+}

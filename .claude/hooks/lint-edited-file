@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+// PostToolUse: autocorrect the file the agent just wrote and report what is left (exit 2).
+import { execFileSync, spawnSync } from "node:child_process"
+import { existsSync, readFileSync, statSync } from "node:fs"
+
+let file
+try {
+  process.chdir(execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim())
+  file = String(JSON.parse(readFileSync(0, "utf8")).tool_input?.file_path ?? "")
+} catch (error) {
+  console.error(`The lint hook could not run (${error.message}); run bin/check before finishing.`)
+  process.exit(2)
+}
+if (!existsSync(file) || !statSync(file).isFile()) process.exit(0)
+
+const commands = /\.(js|mjs|ts|vue)$/.test(file)
+  ? [
+      [
+        "pnpm",
+        "exec",
+        "eslint",
+        "--cache",
+        "--fix",
+        "--max-warnings",
+        "0",
+        "--no-warn-ignored",
+        file,
+      ],
+      ["pnpm", "exec", "prettier", "--write", "--log-level", "warn", file],
+    ]
+  : /\.(json|css|md|yml|yaml)$/.test(file)
+    ? [["pnpm", "exec", "prettier", "--write", "--log-level", "warn", "--ignore-unknown", file]]
+    : []
+
+for (const [command, ...args] of commands) {
+  const run = spawnSync(command, args, { encoding: "utf8" })
+  if (run.status !== 0) {
+    console.error(`${run.stdout}${run.stderr}`)
+    process.exit(2)
+  }
+}
