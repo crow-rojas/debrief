@@ -1,0 +1,25 @@
+{
+  "cli": {
+    "usage": "Usage: ownship <init | start | status | pair>",
+    "nodeTooOld": "ownship needs Node {required} or newer; this is Node {current}. Upgrade Node and run init again.",
+    "noAgents": "Neither claude nor codex is on PATH. Install one of them; ownship generates cards with it.",
+    "agentsFound": "Found: {agents}.",
+    "hooksQuestion": "Install a Stop hook so ownship hears about each finished turn right away? [Y/n] ",
+    "hookAdded": "Added the Stop hook to {file}.",
+    "hookPresent": "The Stop hook is already in {file}.",
+    "codexTrust": "Codex runs a new hook only after you trust it: open Codex, run /hooks and approve the ownship hook.",
+    "started": "The ownship daemon is running on port {port}.",
+    "openDesktop": "Open {url} on this computer. Run ownship pair to use your phone.",
+    "statusDaemon": "Daemon: {state}",
+    "statusRunning": "running on port {port}",
+    "statusStopped": "not running",
+    "statusTurns": "Turns: {queued} queued, {generated} generated, {failed} failed",
+    "statusCards": "Cards: {due} due now, {total} in total, {flagged}% flagged as wrong",
+    "statusLastError": "Last generator error: {error}",
+    "pairTailscale": "Pairing over Tailscale: HTTPS inside your tailnet.",
+    "pairLan": "Pairing over your local network.",
+    "lanWarning": "This uses plain HTTP: anyone on the same network can read your cards. Use it only on networks you trust, or install Tailscale.",
+    "noNetwork": "No Tailscale and no local network address found, so there is nothing to pair over.",
+    "scan": "Scan this code with your phone, or open the link:"
+  }
+}
