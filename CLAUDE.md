@@ -8,11 +8,18 @@ ownship turns what a coding agent just did into short review cards about that wo
 - `bin/check`: the fast gate (ESLint, Prettier, `tsc`, `vue-tsc` once `app/` exists, Vitest, `bin/guard.mjs`). The Stop hook runs it after each turn.
 - `bin/ci`: everything CI runs, adding the build and gitleaks; `git push` runs it. **You are done only when it is green.**
 - `pnpm vitest run <path>`: one test file. `pnpm lint`, `pnpm format`, `pnpm typecheck`.
+- `pnpm build`: the app into `dist/app` and the package into `dist/src`. `node dist/src/cli.js <command>` runs the built CLI; set `OWNSHIP_HOME`, `CLAUDE_CONFIG_DIR` and `CODEX_HOME` to temp dirs to try it without touching your own setup.
 
 ## Map
 
 - `docs/specs/2026-10-28-ownship-v1-design.md`: what v1 is. `docs/plans/`: how it is being built. `docs/adr/`: decisions. `docs/research/`: evidence, including `agent-capture-survey.md` for agent log formats and `versions.md` for pinned versions.
-- `src/`: the package. `test/`: Vitest tests, mirroring `src/`. `test/fixtures/`: recorded agent sessions from toy repos only.
+- `src/cli.ts`: the `ownship` command (init, start, status, pair, and the internal daemon and hook). `src/init.ts`, `src/pair.ts`, `src/messages.ts` (CLI copy from `app/i18n`).
+- `src/capture/`: readers for each agent's session log (`readers/`), git snapshots (`git.ts`) and the capture loop that turns a finished turn into a queued `TurnEvent` (`capture.ts`).
+- `src/generate/`: what reaches the generator (`filter.ts`), the prompt, the JSON schema, the presets with their anti-recursion flags, the runner, the queue with its daily cap and the pipeline.
+- `src/cards/`: card types, the evidence check, grading and FSRS scheduling. `src/knowledge/`: notes from flagged cards.
+- `src/daemon/`: the HTTP API with token auth (`server.ts`), start-on-demand (`lifecycle.ts`) and the daemon itself (`main.ts`). `src/hooks/`: installing the Stop hooks and the doorbell they run.
+- `app/`: the Vue review app, built into `dist/app`. `app/i18n/`: every string, in `en.json` and `es.json`.
+- `test/`: Vitest tests, mirroring `src/` and `app/`. `test/fixtures/`: synthetic agent sessions with toy content only.
 - `.claude/`, `.codex/hooks.json`, `lefthook.yml`, `bin/`: the harness (ADR-008).
 
 ## Rules
