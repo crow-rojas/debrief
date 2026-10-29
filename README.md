@@ -38,7 +38,7 @@ ownship uninstall   # remove the hooks and stop the daemon; --purge also deletes
 
 ## Privacy defaults
 
-- The database, your notes and the session logs never leave your machine. Your phone only receives cards and their snippets, never repo files or transcripts.
+- The database, your notes and the session logs never leave your machine. Your phone only receives cards with their snippets and your knowledge notes, never repo files or transcripts.
 - What reaches a model is what your own agent receives as generator input: the turn's prompt, messages and diff, without `.gitignore`d files, files in `.ownshipignore`, lockfiles, generated files and hunks that look like secrets.
 - Research mode, off by default and turned on per repo in `~/.ownship/config.json`, lets the generator read the repo and the web with its tools.
 - The daemon listens on `127.0.0.1`, and every API call needs the pairing token. On a local network the phone uses plain HTTP, so pair that way only on networks you trust; Tailscale keeps it encrypted.
