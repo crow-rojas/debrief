@@ -1,11 +1,17 @@
-import { readFileSync, readdirSync } from "node:fs"
+import { readFileSync, readdirSync, utimesSync, writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { beforeEach, describe, expect, it } from "vitest"
 import type { CardDraft } from "../../src/cards/types.ts"
 import { loadConfig } from "../../src/config.ts"
 import { openDb } from "../../src/db.ts"
 import { runPipelineOnce } from "../../src/generate/pipeline.ts"
-import { flagCard, flaggedShare, readNotes, writeNote } from "../../src/knowledge/notes.ts"
+import {
+  flagCard,
+  flaggedShare,
+  listNotes,
+  readNotes,
+  writeNote,
+} from "../../src/knowledge/notes.ts"
 import { homePath } from "../../src/paths.ts"
 import { insertTurn, makeRepo, tempHome } from "../helpers.ts"
 
@@ -110,5 +116,24 @@ describe("knowledge notes", () => {
     expect(JSON.parse(readFileSync(out, "utf8")).input).toContain(
       "Imports never call the serializer.",
     )
+  })
+
+  it("listNotes returns every repo's notes newest first, file names only", () => {
+    const older = writeNote("a-00000000", card, "Older note.", NOW)
+    const newer = writeNote("b-00000000", card, "Newer note.", NOW)
+    utimesSync(older, new Date(2026, 9, 27), new Date(2026, 9, 27))
+    utimesSync(newer, NOW, NOW)
+    writeFileSync(homePath("knowledge", "a-00000000", "README.txt"), "not a note")
+    const notes = listNotes()
+    expect(notes.map((n) => n.slug)).toEqual(["b-00000000", "a-00000000"])
+    expect(notes[0]?.text).toContain("Newer note.")
+    for (const n of notes) {
+      expect(n.file).toMatch(/\.md$/)
+      expect(n.file).not.toContain("/")
+    }
+  })
+
+  it("listNotes is empty when the knowledge folder is missing", () => {
+    expect(listNotes()).toEqual([])
   })
 })

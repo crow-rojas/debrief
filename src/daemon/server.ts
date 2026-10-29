@@ -7,11 +7,18 @@ import { grade, type Answer } from "../cards/grade.ts"
 import { schedule, type FsrsState } from "../cards/schedule.ts"
 import type { CardDraft } from "../cards/types.ts"
 import type { Config } from "../config.ts"
-import { flagCard } from "../knowledge/notes.ts"
+import { flagCard, listNotes } from "../knowledge/notes.ts"
 import { homePath } from "../paths.ts"
 import { sameToken } from "./token.ts"
 
 export type SessionCard = CardDraft & { id: number; repo: string; endedAt: string }
+
+export type HomeSummary = {
+  due: number
+  nextDueAt: string | null
+  repos: { slug: string; due: number; lastTurnAt: string }[]
+  notes: number
+}
 
 type Options = {
   token: string
@@ -56,13 +63,14 @@ async function json(req: http.IncomingMessage): Promise<Record<string, unknown>>
   return raw ? (JSON.parse(raw) as Record<string, unknown>) : {}
 }
 
-function session(db: DatabaseSync, limit: number, now: Date): SessionCard[] {
+function session(db: DatabaseSync, limit: number, now: Date, repo?: string): SessionCard[] {
   const rows = db
     .prepare(
       `SELECT c.id, c.payload_json, t.slug, t.ended_at FROM cards c JOIN turns t ON t.id = c.turn_id
-       WHERE c.state = 'active' AND c.due <= ? ORDER BY (c.fsrs_json IS NULL), c.due LIMIT ?`,
+       WHERE c.state = 'active' AND c.due <= ? AND (? IS NULL OR t.slug = ?)
+       ORDER BY (c.fsrs_json IS NULL), c.due LIMIT ?`,
     )
-    .all(now.toISOString(), limit) as {
+    .all(now.toISOString(), repo ?? null, repo ?? null, limit) as {
     id: number
     payload_json: string
     slug: string
@@ -74,6 +82,25 @@ function session(db: DatabaseSync, limit: number, now: Date): SessionCard[] {
     repo: r.slug,
     endedAt: r.ended_at,
   }))
+}
+
+function home(db: DatabaseSync, now: Date): HomeSummary {
+  const at = now.toISOString()
+  const { due } = db
+    .prepare("SELECT count(*) AS due FROM cards WHERE state = 'active' AND due <= ?")
+    .get(at) as { due: number }
+  const { next } = db
+    .prepare("SELECT min(due) AS next FROM cards WHERE state = 'active' AND due > ?")
+    .get(at) as { next: string | null }
+  const repos = db
+    .prepare(
+      `SELECT t.slug, count(CASE WHEN c.due <= ? THEN 1 END) AS due,
+         (SELECT max(ended_at) FROM turns WHERE slug = t.slug) AS lastTurnAt
+       FROM cards c JOIN turns t ON t.id = c.turn_id WHERE c.state = 'active'
+       GROUP BY t.slug ORDER BY lastTurnAt DESC`,
+    )
+    .all(at) as HomeSummary["repos"]
+  return { due, nextDueAt: next, repos, notes: listNotes().length }
 }
 
 // Grades and schedules once per reviewId: a retried request returns the first result.
@@ -176,7 +203,12 @@ export function createServer(db: DatabaseSync, config: Config, opts: Options): h
       }
       if (req.method === "GET" && url.pathname === "/api/session") {
         const limit = Math.min(Number(url.searchParams.get("limit") ?? 5) || 5, 50)
-        return send(res, 200, { cards: session(db, limit, now) })
+        const repo = url.searchParams.get("repo") ?? undefined
+        return send(res, 200, { cards: session(db, limit, now, repo) })
+      }
+      if (req.method === "GET" && url.pathname === "/api/home") return send(res, 200, home(db, now))
+      if (req.method === "GET" && url.pathname === "/api/notes") {
+        return send(res, 200, { notes: listNotes() })
       }
       const match = url.pathname.match(/^\/api\/cards\/(\d+)\/(answer|flag)$/)
       if (req.method === "POST" && match) {
