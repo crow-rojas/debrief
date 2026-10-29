@@ -49,6 +49,7 @@ ownship uninstall   # remove the hooks and stop the daemon; --purge also deletes
 
 ## Docs
 
+- [Roadmap](ROADMAP.md)
 - [v1 design](docs/specs/2026-10-28-ownship-v1-design.md) and [decisions](docs/adr/)
 - [Research behind the idea](docs/research/learning-while-agents-code.md) ([original in Spanish](docs/research/learning-while-agents-code.es.md)) and the [agent capture survey](docs/research/agent-capture-survey.md)
 
