@@ -4,6 +4,10 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 
 ## [Unreleased]
 
+### Fixed
+
+- Running `ownship init` again after an update or from another install replaces ownship's old Stop hook instead of adding a second one next to it.
+
 ## [0.1.0] - 2026-10-29
 
 ### Added

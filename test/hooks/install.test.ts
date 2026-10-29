@@ -21,6 +21,23 @@ describe("hook install", () => {
     ).toHaveLength(1)
   })
 
+  it("a new command replaces ownship's old hook, as after an update", () => {
+    const file = join(dir(), "settings.json")
+    const updated = '"/usr/bin/node" "/opt/ownship-0.2.0/dist/cli.js" hook claude-code'
+    writeFileSync(
+      file,
+      JSON.stringify({
+        hooks: { Stop: [{ hooks: [{ type: "command", command: "afplay done.wav" }] }] },
+      }),
+    )
+    installClaudeHook(file, COMMAND)
+    expect(installClaudeHook(file, updated)).toBe("added")
+    const commands = read(file)
+      .hooks.Stop.flatMap((g: { hooks: { command: string }[] }) => g.hooks)
+      .map((h: { command: string }) => h.command)
+    expect(commands).toEqual(["afplay done.wav", updated])
+  })
+
   it("existing hooks and settings survive the install", () => {
     const file = join(dir(), "settings.json")
     const existing = {
