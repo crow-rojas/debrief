@@ -6,8 +6,21 @@ type Hook = { type: string; command: string; timeout?: number }
 type Group = { matcher?: string; hooks: Hook[] }
 type Settings = { hooks?: Record<string, Group[]> } & Record<string, unknown>
 
+// ownship's own hook commands: this CLI, by absolute path, with the hook subcommand.
+const OURS = /cli\.(js|ts)" hook (claude-code|codex)$/
+const isOurs = (hook: Hook) => OURS.test(hook.command)
+
+// Stop hook groups without ownship's own hooks; a group they leave empty goes too, others stay as is.
+const withoutOurs = (stop: Group[]) =>
+  stop.flatMap((group) => {
+    if (!group.hooks?.some(isOurs)) return [group]
+    const hooks = group.hooks.filter((hook) => !isOurs(hook))
+    return hooks.length > 0 ? [{ ...group, hooks }] : []
+  })
+
 // Adds a Stop hook to a Claude Code settings.json or a Codex hooks.json (same shape), keeping
-// everything else, and backs the file up before its first change.
+// everything else, and backs the file up before its first change. An ownship hook with another
+// command, left by an earlier install or version, gives way to the new one.
 function installStopHook(file: string, command: string): "added" | "present" {
   const settings: Settings = existsSync(file)
     ? (JSON.parse(readFileSync(file, "utf8")) as Settings)
@@ -18,16 +31,12 @@ function installStopHook(file: string, command: string): "added" | "present" {
   if (existsSync(file) && !existsSync(backup)) copyFileSync(file, backup)
   settings.hooks = {
     ...settings.hooks,
-    Stop: [...stop, { hooks: [{ type: "command", command, timeout: 10 }] }],
+    Stop: [...withoutOurs(stop), { hooks: [{ type: "command", command, timeout: 10 }] }],
   }
   mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`)
   return "added"
 }
-
-// ownship's own hook commands: this CLI, by absolute path, with the hook subcommand.
-const OURS = /cli\.(js|ts)" hook (claude-code|codex)$/
-const isOurs = (hook: Hook) => OURS.test(hook.command)
 
 function read(file: string): Settings | null {
   return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as Settings) : null
@@ -37,14 +46,11 @@ export function hasStopHook(file: string): boolean {
   return Boolean(read(file)?.hooks?.Stop?.some((group) => group.hooks?.some(isOurs)))
 }
 
-// Removes ownship's Stop hook and nothing else; a group left empty goes too.
+// Removes ownship's Stop hook and nothing else.
 export function removeStopHook(file: string): "removed" | "absent" {
   const settings = read(file)
   if (!settings || !hasStopHook(file)) return "absent"
-  const stop = (settings.hooks?.Stop ?? [])
-    .map((group) => ({ ...group, hooks: group.hooks.filter((hook) => !isOurs(hook)) }))
-    .filter((group) => group.hooks.length > 0)
-  settings.hooks = { ...settings.hooks, Stop: stop }
+  settings.hooks = { ...settings.hooks, Stop: withoutOurs(settings.hooks?.Stop ?? []) }
   writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`)
   return "removed"
 }
