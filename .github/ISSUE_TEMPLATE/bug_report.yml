@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in ownship doesn't work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Remove private code** from logs, cards and screenshots before posting. Security problems go through the Security tab, not here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      placeholder: Steps to reproduce, what you saw, what you expected to see.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: macOS 26.1 / Ubuntu 24.04 / Windows 11
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: "`node -v`, the ownship version, and `claude --version` or `codex --version`"
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: ownship status
+      description: The output of `ownship status`.
+      render: text
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The relevant lines from `~/.ownship/capture.log` and `~/.ownship/daemon.log`.
+      render: text

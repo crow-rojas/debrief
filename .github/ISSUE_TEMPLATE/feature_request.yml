@@ -1,0 +1,22 @@
+name: Feature request
+description: Suggest a change to ownship or to the roadmap.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: The moment you wished ownship did something different. Check ROADMAP.md first; it may already be planned.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Does it send anything new off the machine?
+      description: ownship is local first. Say whether the idea needs more data to reach the generator, the phone or a network service.

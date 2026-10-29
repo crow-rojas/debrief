@@ -89,6 +89,18 @@ describe("bin/guard", () => {
     expect(status, output).toBe(0)
   })
 
+  it("does not treat issue and pull request templates as harness", () => {
+    const { status, output } = guardAfter({
+      ".github/ISSUE_TEMPLATE/bug_report.yml": "name: Bug\n",
+    })
+    expect(status, output).toBe(0)
+  })
+
+  it("still guards the workflows", () => {
+    const base = { ".github/workflows/ci.yml": "on: push\n" }
+    expect(guardAfter({ ".github/workflows/ci.yml": "on: pull_request\n" }, base).status).toBe(1)
+  })
+
   it("passes an ordinary change", () => {
     const { status, output } = guardAfter({ "src/index.ts": "export const a = 1\n" })
     expect(status, output).toBe(0)
