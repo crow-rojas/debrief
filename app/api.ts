@@ -31,8 +31,15 @@ export async function getSession(limit = 5): Promise<SessionCard[]> {
   return ((await res.json()) as { cards: SessionCard[] }).cards
 }
 
+// crypto.randomUUID exists only in secure contexts, and LAN pairing is plain HTTP.
+function newId(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("")
+}
+
 // The same reviewId on every retry, so a flaky network never applies FSRS twice.
-export async function answer(cardId: number, answerGiven: Answer, reviewId = crypto.randomUUID()) {
+export async function answer(cardId: number, answerGiven: Answer, reviewId = newId()) {
   for (let attempt = 0; ; attempt++) {
     try {
       const res = await call(`/api/cards/${cardId}/answer`, {

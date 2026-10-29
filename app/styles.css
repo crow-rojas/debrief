@@ -344,3 +344,12 @@ input:focus-visible {
     transition: none;
   }
 }
+
+.banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--wrong-soft);
+  color: var(--wrong);
+  font-size: 14px;
+}

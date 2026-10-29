@@ -67,6 +67,16 @@ describe("SessionView", () => {
     expect(wrapper.text()).toContain("Question 2?")
   })
 
+  it("tells the user when an answer could not be saved and keeps the card", async () => {
+    api.answer.mockRejectedValue(new Error("offline"))
+    const wrapper = await mountSession()
+    await wrapper.findAll("[data-test=option]")[1]!.trigger("click")
+    await wrapper.find("[data-test=next]").trigger("click")
+    await flushPromises()
+    expect(wrapper.find("[data-test=save-failed]").exists()).toBe(true)
+    expect(wrapper.text()).toContain("Question 1?")
+  })
+
   it("shows the empty state when the session runs out", async () => {
     api.getSession.mockResolvedValue([])
     const wrapper = await mountSession()
