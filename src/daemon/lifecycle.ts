@@ -1,10 +1,12 @@
 import { spawn } from "node:child_process"
 import { existsSync, readFileSync, rmSync } from "node:fs"
 import { fileURLToPath } from "node:url"
+import pkg from "../../package.json" with { type: "json" }
 import { loadConfig } from "../config.ts"
+import { meetsMinimum } from "../init.ts"
 import { homePath } from "../paths.ts"
 
-type DaemonInfo = { pid: number; port: number }
+type DaemonInfo = { pid: number; port: number; version?: string }
 
 export function daemonInfo(): DaemonInfo | null {
   const file = homePath("daemon.json")
@@ -37,9 +39,14 @@ function cliEntry(): { path: string; execArgv: string[] } {
   }
 }
 
+// A running daemon is reused unless it is older than this CLI (or predates daemon.json versions),
+// so updating ownship takes effect on the next command or turn; a newer one is never downgraded.
 export async function ensureDaemon(): Promise<{ port: number }> {
   const info = daemonInfo()
-  if (info && (await healthy(info.port))) return { port: info.port }
+  if (info && (await healthy(info.port))) {
+    if (info.version && meetsMinimum(info.version, pkg.version)) return { port: info.port }
+    await stopDaemon()
+  }
   const { path, execArgv } = cliEntry()
   const env = { ...process.env }
   delete env.OWNSHIP_GENERATING

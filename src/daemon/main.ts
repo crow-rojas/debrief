@@ -1,5 +1,6 @@
 import { appendFileSync, rmSync, writeFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
+import pkg from "../../package.json" with { type: "json" }
 import { catchUp, processFile, watch } from "../capture/capture.ts"
 import { claudeCodeReader } from "../capture/readers/claude-code.ts"
 import { codexReader } from "../capture/readers/codex.ts"
@@ -72,7 +73,10 @@ export async function startDaemon(): Promise<void> {
     server.listen(config.port, config.lan ? "0.0.0.0" : "127.0.0.1", resolve)
   })
   // Bound first: a second daemon fails on the port before it reads any log.
-  writeFileSync(homePath("daemon.json"), JSON.stringify({ pid: process.pid, port: config.port }))
+  writeFileSync(
+    homePath("daemon.json"),
+    JSON.stringify({ pid: process.pid, port: config.port, version: pkg.version }),
+  )
   await catchUp(db, READERS, new Date())
   const stopWatching = watch(db, READERS, { onStored: () => void pump() })
   log(`listening on ${config.lan ? "0.0.0.0" : "127.0.0.1"}:${config.port}`)
