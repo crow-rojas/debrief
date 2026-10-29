@@ -31,9 +31,13 @@ const done = ref(0)
 const state = ref<"loading" | "ready" | "unpaired" | "error">("loading")
 // "Not now" only hides a card for this visit; it stays due on the server.
 const skipped = new Set<number>()
+// Answers and flags still on their way: a reload waits for them, or the server would hand the
+// card that was just answered back as still due.
+const saving = new Set<Promise<unknown>>()
 const current = computed(() => cards.value[0])
 
 async function load() {
+  await Promise.allSettled([...saving])
   try {
     cards.value = (await getSession()).filter((c) => !skipped.has(c.id))
     state.value = "ready"
@@ -51,9 +55,11 @@ function advance() {
 async function onDone(given: Answer) {
   const card = current.value
   if (!card) return
+  const saved = answer(card.id, given)
+  saving.add(saved)
   advance()
   try {
-    await answer(card.id, given)
+    await saved
     saveFailed.value = false
   } catch (error) {
     if (error instanceof NotPairedError) state.value = "unpaired"
@@ -63,6 +69,8 @@ async function onDone(given: Answer) {
       done.value--
       saveFailed.value = true
     }
+  } finally {
+    saving.delete(saved)
   }
 }
 
@@ -74,8 +82,11 @@ function onNotNow() {
 async function onFlag(input: FlagInput) {
   const card = current.value
   if (!card) return
+  const saved = flag(card.id, input).catch(() => {})
+  saving.add(saved)
   advance()
-  await flag(card.id, input).catch(() => {})
+  await saved
+  saving.delete(saved)
 }
 
 onMounted(load)
