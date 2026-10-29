@@ -42,6 +42,24 @@ export function readNotes(slug: string): string[] {
     .map((file) => readFileSync(file, "utf8"))
 }
 
+export type Note = { slug: string; file: string; text: string }
+
+// Every note of every repo, newest first. file is the bare name, never a path.
+export function listNotes(): Note[] {
+  const root = homePath("knowledge")
+  if (!existsSync(root)) return []
+  return readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) =>
+      readdirSync(join(root, entry.name))
+        .filter((name) => name.endsWith(".md"))
+        .map((name) => ({ slug: entry.name, file: name, path: join(root, entry.name, name) })),
+    )
+    .map((n) => ({ ...n, mtime: statSync(n.path).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime || b.path.localeCompare(a.path))
+    .map(({ slug, file, path }) => ({ slug, file, text: readFileSync(path, "utf8") }))
+}
+
 export function flagCard(
   db: DatabaseSync,
   cardId: number,
