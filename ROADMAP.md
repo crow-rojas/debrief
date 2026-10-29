@@ -6,10 +6,10 @@ What ownship has, what comes next and what is further out. There are no dates: i
 
 - **v1, the first loop.** Claude Code and Codex turns become cards about that exact work: capture from the agents' own session logs, a git snapshot per turn, cards written by your own agent with every quote checked against the turn, FSRS scheduling, knowledge notes from cards you flag as wrong, and a review app for the phone and the desktop in English and Spanish ([spec](docs/specs/2026-10-28-ownship-v1-design.md), [ADRs](docs/adr/)).
 - **Setup in one step.** `ownship init` picks the language, installs the hooks, starts the daemon, opens the app already paired and shows the phone QR over Tailscale. `open`, `stop`, `uninstall` and `config` cover the rest.
+- **On npm.** `npx ownship init` works without cloning the repo, and the repository is `crow-rojas/ownship` ([ADR-001](docs/adr/001-name.md)).
 
 ## Now
 
-- **Publish to npm**, so `npx ownship init` works without cloning the repo, and rename the repository to `crow-rojas/ownship` ([ADR-001](docs/adr/001-name.md)).
 - **A home and navigation.** Today the app is a single review screen. It needs a start page with what is due, a view per repo, your knowledge notes and a sense of progress.
 - **Design and motion.** A deeper pass on layout, typography and short animations that show what changed. Progress shows mastery (what you can now explain about each repo, retention after a week), not streaks: punishing a missed day is an explicit non-goal ([spec](docs/specs/2026-10-28-ownship-v1-design.md#anti-goals)).
 
