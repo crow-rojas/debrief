@@ -26,6 +26,7 @@ const turn: FilteredTurn = {
   ],
   dropped: [],
   truncated: false,
+  omitted: 0,
 }
 
 const choice = (over: Partial<Extract<CardDraft, { kind: "choice" }>> = {}): CardDraft => ({

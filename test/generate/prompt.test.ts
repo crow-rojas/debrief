@@ -8,6 +8,7 @@ const turn: FilteredTurn = {
   changes: [{ path: "app/models.py", op: "modify", patch: "+def clean(self): ..." }],
   dropped: [{ path: "pnpm-lock.yaml", reason: "lockfile" }],
   truncated: false,
+  omitted: 0,
 }
 
 describe("buildPrompt", () => {
@@ -19,5 +20,8 @@ describe("buildPrompt", () => {
     expect(prompt).toContain("Move the RUT check")
     expect(prompt).not.toContain("pnpm-lock.yaml")
     expect(prompt).toMatch(/0 to 3 cards/)
+    expect(buildPrompt({ ...turn, omitted: 12 }, [], "en")).toContain(
+      "12 more changed files were left out",
+    )
   })
 })

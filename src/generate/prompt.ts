@@ -26,5 +26,6 @@ export function buildPrompt(turn: FilteredTurn, notes: string[], language: "en" 
     "## The patch",
     patches || "(no code changed in this turn)",
     turn.truncated ? "\n(Some patches were truncated.)" : "",
+    turn.omitted ? `(${turn.omitted} more changed files were left out to fit.)` : "",
   ].join("\n")
 }
