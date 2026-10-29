@@ -2,13 +2,13 @@
 
 > Companion to [learning-while-agents-code.md](learning-while-agents-code.md), sections 4.1 and 4.2. Researched on 2026-10-28. Versions checked on this machine: Claude Code 2.1.312, Codex CLI 0.159.0 (latest 0.165.0), Gemini CLI 0.45.0 (latest 0.66.0), Copilot CLI 1.0.59 (latest 1.0.105) and OpenCode 1.18.18 (latest 1.19.5 / 2.2.0). Cursor and Aider are not installed here, so everything about them comes from docs and source. For local checks I only looked at the _structure_ of the files (record types and keys), never their contents.
 
-**Short answer: the hypothesis mostly holds, but it breaks in three places.**
+The short answer: the hypothesis mostly holds, but it breaks in three places.
 
 1. **Reading the logs works for prompts and messages, but not as the source of truth for the diff.** Claude Code, Codex, Gemini CLI and OpenCode all record file edits with enough data to rebuild a patch. But edits the agent makes through the shell (`sed`, a formatter, a codegen script) do not show up as edit records, except in Claude Code's beta `bashEditDiff`. Cursor's readable transcript has no tool results at all. Aider writes Markdown. The diff should come from git; the logs should say _which agent turn_ it belongs to and _why_.
 2. **Every format is explicitly unstable.** Anthropic says the transcript "entry format is internal to Claude Code and changes between versions, so scripts that parse these files directly can break on any release". OpenAI says "the transcript format isn't a stable interface for hooks". During 2026 alone, Gemini moved from JSON to event-sourced JSONL, OpenCode moved from JSON files to SQLite and then to a v2 schema, Goose and Cline changed stores, and Codex started compressing cold rollouts to `.zst`. A "small reader" per agent is small only if it comes with fixtures, version detection and a plan for breakage.
-3. **Shelling out to the agent for generation feeds back into capture.** A headless run (`claude -p`, `codex exec`, `gemini -p`, `copilot -p`, `opencode run`) writes a session to the same log directory and, in most agents, fires the user's own Stop hooks. So ownship would capture and ownship itself. Every agent needs its own "don't persist, don't run hooks" flags. On Claude Code, the flag that skips hooks (`--bare`) also stops using the subscription login. The docs say `--bare` "will become the default for `-p` in a future release".
+3. **Shelling out to the agent for generation feeds back into capture.** A headless run (`claude -p`, `codex exec`, `gemini -p`, `copilot -p`, `opencode run`) writes a session to the same log directory and, in most agents, fires the user's own Stop hooks. So ownship would end up capturing itself. Every agent needs its own "don't persist, don't run hooks" flags. On Claude Code, the flag that skips hooks (`--bare`) also stops using the subscription login. The docs say `--bare` "will become the default for `-p` in a future release".
 
-Two things work better than expected. Both Claude Code (`--json-schema`) and Codex (`--output-schema`) enforce a JSON Schema on headless output. And there is mature open-source prior art for multi-agent readers: SpecStory CLI (Apache-2.0) and agentsview (MIT). ownship should learn from them before writing its own readers. No cross-agent standard (ACP, Agent Trace, OpenTelemetry GenAI, AGENTS.md, MCP) gives a passive observer the diff plus reasoning of a finished turn.
+Two things work better than expected. Claude Code (`--json-schema`) and Codex (`--output-schema`) both enforce a JSON Schema on headless output. There is also mature open-source prior art for multi-agent readers, SpecStory CLI (Apache-2.0) and agentsview (MIT), and ownship should learn from it before writing its own readers. No cross-agent standard (ACP, Agent Trace, OpenTelemetry GenAI, AGENTS.md, MCP) gives a passive observer the diff plus reasoning of a finished turn.
 
 ## Comparison
 
@@ -51,7 +51,7 @@ Two things work better than expected. Both Claude Code (`--json-schema`) and Cod
 
 - **Storage.** I verified it locally.
   - Line types: `session_meta` (with `cli_version`, `cwd`, `git`, `originator`, `source`, `history_mode`), `turn_context`, `response_item`, `event_msg`, `compacted`, `world_state`, `token_usage_record`.
-  - In `paginated` history mode (all 254 local rollouts, 0.130–0.158), `event_msg/item_completed` items of type `FileChange` carry `changes[path] = {type: add|delete|update, content | unified_diff, move_path}`. That is a ready-made unified diff.
+  - In `paginated` history mode (all 254 local rollouts, 0.130 to 0.158), `event_msg/item_completed` items of type `FileChange` carry `changes[path] = {type: add|delete|update, content | unified_diff, move_path}`. That is a ready-made unified diff.
   - In `legacy` mode those items are not persisted ([policy.rs](https://github.com/openai/codex/blob/main/codex-rs/rollout/src/policy.rs)), so the reader must parse `custom_tool_call` `apply_patch` input in Codex's own `*** Begin Patch` format.
   - Turn boundaries: `task_started` and `task_complete` (with `last_agent_message`), keyed by `turn_id`. Reasoning is `encrypted_content` with empty summaries in every local record (1,091 of 1,091), so **no readable reasoning**.
   - Headless (`originator: codex_exec`), desktop app, IDE and subagent threads all land in the same tree, so one reader covers every surface but must filter by origin.
@@ -103,7 +103,7 @@ Two things work better than expected. Both Claude Code (`--json-schema`) and Cod
   - `~/.copilot/session-state` does not exist on this machine, because Copilot has not been used for a session here.
 - **Hooks.** Verified locally from an installed hook file, which lists 13 events.
   - `agentStop` fires per turn with `transcriptPath` ([hooks reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-hooks-reference)).
-  - **It also runs hooks from `.claude/settings.json` and `.claude/settings.local.json`** (changelog: "Read .claude/settings.json and .claude/settings.local.json as additional repo config sources", [changelog](https://github.com/github/copilot-cli/blob/main/changelog.md)). A ownship hook installed for Claude Code at repo level fires under Copilot too, with a different payload.
+  - **It also runs hooks from `.claude/settings.json` and `.claude/settings.local.json`** (changelog: "Read .claude/settings.json and .claude/settings.local.json as additional repo config sources", [changelog](https://github.com/github/copilot-cli/blob/main/changelog.md)). An ownship hook installed for Claude Code at repo level fires under Copilot too, with a different payload.
 - **Headless.** `copilot -p … -s --output-format json` (JSONL), with `--available-tools`/`--excluded-tools` and `--mode plan`. It uses the Copilot subscription. There is no schema flag.
 
 ### OpenCode
@@ -136,7 +136,7 @@ Two things work better than expected. Both Claude Code (`--json-schema`) and Cod
 | **AGENTS.md**                               | An instructions file ([agents.md](https://agents.md/))                                                                                                                                                    | n/a                                                                                                                                                                                                   | Most agents                                                                                                                                                                                                                                                                                            | Not a capture format. Useful only to ask agents to explain their decisions in prose                        |
 | **MCP** (2026-07-28)                        | Only the calls the model chooses to make. "Full conversation history stays with the host" ([architecture](https://modelcontextprotocol.io/specification/2026-07-28/architecture.md))                      | No                                                                                                                                                                                                    | All                                                                                                                                                                                                                                                                                                    | Not for capture; still useful as a query channel (section 4.1)                                             |
 
-**Prior art that matters more than any standard:**
+The prior art matters more than any of these standards:
 
 - **SpecStory CLI** ([repo](https://github.com/specstoryai/getspecstory/tree/dev/specstory-cli), Apache-2.0, Go, v2.16.0) has a per-agent `Provider` interface and a normalized [SessionData v1 schema](https://github.com/specstoryai/getspecstory/blob/dev/specstory-cli/pkg/spi/schema/session-data-v1.json) built from `exchanges[]` (one per turn) → `messages[]` with `text`/`thinking` parts and `tool.input`. It covers Claude Code, Codex, Cursor CLI, Gemini, OpenCode and others.
 - **agentsview** ([repo](https://github.com/kenn-io/agentsview), MIT, Go) is a local daemon with file watchers, REST and SSE, covering more than 60 stores.
@@ -146,14 +146,14 @@ Their per-agent diff and reasoning coverage is **not verified**.
 
 ## Recommendation for ownship v1
 
-The following is opinion, grounded in the facts above.
+This section is opinion, based on the facts above.
 
 1. **Start with Claude Code and Codex.** They are the only two with all four pieces: a structured patch in the log, a per-turn hook with `turn_id`/`transcript_path`, a schema-enforced headless mode and subscription auth. Both are installed here, which makes fixtures cheap. Add Gemini and OpenCode in v0.2; their readers are harder (an event-log replay, and two SQLite schemas). Put Cursor and Aider in a "git + hooks" tier, not a reader tier.
 2. **Make git the diff of record, and use the reader for attribution and the transcript.**
    - At each detected turn end, snapshot the working tree to a detached object (`git add -A` into a temporary index, `git write-tree`, never touching the user's index or stash).
    - The turn's diff is that snapshot against the previous one, or against `HEAD` at session start.
    - Use the agent's own patches only to attribute files to the turn and to flag edits the agent didn't make, such as yours or a formatter's.
-   - This catches shell edits and survives format changes. Its ceiling is concurrent human edits in the same tree, which it can flag but not separate.
+   - This catches shell edits and survives format changes. Its limit is concurrent human edits in the same tree, which it can flag but not separate.
 3. **Detect turn ends by watching the files; use hooks only as a doorbell.** Watch the log directories (Codex `task_complete`; Claude Code an `assistant` record with `stop_reason: end_turn`; Gemini/Copilot their turn-end records) and debounce. Then add the optional Stop/`agentStop`/`AfterAgent` hook to ring sooner. That way a missing, untrusted (Codex hash trust) or disabled hook only delays ownship. Keep the hook idempotent; Claude Code's own docs say the transcript may lag `Stop`.
 4. **Guard every generation call against recursion.**
    - Claude Code: `claude -p --no-session-persistence --tools "" --output-format json --json-schema …`, plus a `OWNSHIP_GENERATING=1` env marker that ownship's hook checks and exits on.

@@ -24,9 +24,9 @@ On two ratings: Anki forum analyses suggest FSRS loses little or no accuracy whe
 
 ## Alternatives not taken
 
-- **Four buttons (Again, Hard, Good, Easy)**: more signal in theory, more misuse in practice, and one more decision per card on a phone.
-- **LLM grading of free answers**: inconsistent and often lenient.
-- **Only deterministic kinds** (predict the output, Parsons): train language semantics, not the reasoning the owner is asked about.
+- Four buttons (Again, Hard, Good, Easy): more signal in theory, more misuse in practice, and one more decision per card on a phone.
+- LLM grading of free answers: inconsistent and often lenient.
+- Only deterministic kinds (predict the output, Parsons): train language semantics, not the reasoning the owner is asked about.
 
 ## Consequences
 

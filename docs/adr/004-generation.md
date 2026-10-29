@@ -17,9 +17,9 @@ ownship is free, so it cannot pay for a model. Cards about business logic and de
 
 ## Alternatives not taken
 
-- **A bundled local model as the default**: free and private, but small models write worse questions, and the user's agent is already authorized for that code.
-- **ownship's own retrieval and connectors**: rebuilds what the user's agent already does.
-- **Generating once per session**: sessions have no reliable end, and cards would arrive late.
+- A bundled local model as the default: free and private, but small models write worse questions, and the user's agent is already authorized for that code.
+- ownship's own retrieval and connectors: rebuilds what the user's agent already does.
+- Generating once per session: sessions have no reliable end, and cards would arrive late.
 
 ## Consequences
 

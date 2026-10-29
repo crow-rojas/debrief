@@ -1,20 +1,20 @@
 {
   "cli": {
     "usage": "Uso: ownship init | open | status | pair | config [clave valor] | start | stop | uninstall [--purge]",
-    "nodeTooOld": "ownship necesita Node {required} o más nuevo; este es Node {current}. Actualiza Node y vuelve a correr init.",
-    "noAgents": "No encontré claude ni codex en el PATH. Instala alguno; ownship genera las tarjetas con él.",
+    "nodeTooOld": "ownship necesita Node {required} o una versión más reciente; este equipo tiene Node {current}. Actualiza Node y vuelve a ejecutar init.",
+    "noAgents": "No encontré claude ni codex en el PATH. Instala uno de los dos: ownship genera las tarjetas con él.",
     "agentsFound": "Encontré: {agents}.",
-    "hooksQuestion": "¿Instalo un hook Stop para que ownship se entere al tiro de cada turno terminado? [S/n] ",
+    "hooksQuestion": "¿Instalo un hook Stop para que ownship sepa de inmediato cuándo termina cada turno? [S/n] ",
     "hookAdded": "Agregué el hook Stop a {file}.",
     "hookPresent": "El hook Stop ya está en {file}.",
-    "codexTrust": "Codex corre un hook nuevo solo después de que confías en él: abre Codex, corre /hooks y aprueba el hook de ownship.",
-    "started": "El daemon de ownship está corriendo en el puerto {port}.",
-    "openDesktop": "Abre {url} en este computador.",
+    "codexTrust": "Codex ejecuta un hook nuevo solo después de que lo apruebas: abre Codex, ejecuta /hooks y aprueba el hook de ownship.",
+    "started": "El daemon de ownship está en ejecución en el puerto {port}.",
+    "openDesktop": "Abre {url} en este equipo.",
     "statusDaemon": "Daemon: {state}",
-    "statusRunning": "corriendo en el puerto {port}",
+    "statusRunning": "en ejecución en el puerto {port}",
     "statusStopped": "detenido",
     "statusTurns": "Turnos: {queued} en cola, {generated} generados, {failed} fallidos",
-    "statusCards": "Tarjetas: {due} para repasar ahora, {total} en total, {flagged}% marcadas como malas",
+    "statusCards": "Tarjetas: {due} para repasar ahora, {total} en total, {flagged}% marcadas como incorrectas",
     "statusLastError": "Último error del generador: {error}",
     "pairTailscale": "Emparejando por Tailscale: HTTPS dentro de tu tailnet.",
     "pairLan": "Emparejando por tu red local.",
@@ -22,27 +22,27 @@
     "noNetwork": "No encontré Tailscale ni una dirección de red local, así que no hay por dónde emparejar.",
     "scan": "Escanea este código con tu teléfono, o abre el enlace:",
     "phoneTailscale": "En tu teléfono, escanea este código (HTTPS por Tailscale):",
-    "phoneHint": "Para repasar en tu teléfono, corre ownship pair.",
-    "hookRemoved": "Saqué el hook Stop de {file}.",
+    "phoneHint": "Para repasar en tu teléfono, ejecuta ownship pair.",
+    "hookRemoved": "Quité el hook Stop de {file}.",
     "stopped": "Detuve el daemon de ownship.",
-    "notRunning": "El daemon de ownship no estaba corriendo.",
-    "purged": "Borré {dir}.",
-    "dataKept": "Tus tarjetas y notas siguen en {dir}. Corre ownship uninstall --purge para borrarlas también.",
+    "notRunning": "El daemon de ownship no estaba en ejecución.",
+    "purged": "Eliminé {dir}.",
+    "dataKept": "Tus tarjetas y notas siguen en {dir}. Ejecuta ownship uninstall --purge para eliminarlas también.",
     "configInvalid": "Ese valor no es válido para {key}.",
     "configUnknown": "No existe el ajuste {key}. Puedes cambiar: {keys}.",
-    "configSet": "{key} quedó en {value}.",
+    "configSet": "{key} ahora es {value}.",
     "statusHooks": "Hooks: Claude Code {claude}, Codex {codex}",
     "hookYes": "instalado",
     "hookNo": "sin instalar",
-    "tailscaleServeFailed": "Tailscale todavía no pudo servir ownship: {reason}"
+    "tailscaleServeFailed": "Tailscale todavía no puede servir ownship: {reason}"
   },
   "app": {
     "loading": "Cargando tarjetas…",
-    "error": "No pude cargar las tarjetas. Revisa que el daemon de ownship esté corriendo.",
+    "error": "No pude cargar las tarjetas. Verifica que el daemon de ownship esté en ejecución.",
     "progress": "{n} de {total}",
     "kind": {
       "defend": "Defiende la decisión",
-      "choice": "Alternativas",
+      "choice": "Opción múltiple",
       "text": "Respuesta corta",
       "number": "Número"
     },
@@ -52,14 +52,14 @@
     },
     "unpaired": {
       "title": "Este dispositivo no está emparejado",
-      "body": "Corre ownship pair en tu computador y escanea el código."
+      "body": "Ejecuta ownship pair en tu equipo y escanea el código."
     },
     "card": {
       "notNow": "Ahora no",
       "wrong": "Esta tarjeta está mal",
       "next": "Siguiente",
       "dontKnow": "No sé, muéstrame",
-      "check": "Revisar",
+      "check": "Comprobar",
       "right": "Correcto",
       "notQuite": "No del todo",
       "accepted": "Respuesta aceptada: {answer}",
@@ -85,6 +85,6 @@
       "regenerate": "Regenerar con mi nota",
       "cancel": "Cancelar"
     },
-    "saveFailed": "No pude guardar tu respuesta. Revisa que el daemon de ownship esté corriendo y vuelve a responder."
+    "saveFailed": "No pude guardar tu respuesta. Verifica que el daemon de ownship esté en ejecución y vuelve a responder."
   }
 }

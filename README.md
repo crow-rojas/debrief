@@ -2,7 +2,7 @@
 
 Understand what your coding agent ships under your name.
 
-While your agent works, ownship turns what it just did into a few short cards about that exact work, schedules them with spaced repetition (FSRS) and serves them to your phone and your desktop. It runs on your machine, uses the agent you already have to write the cards, and keeps your code local.
+While your agent works, ownship turns its last turn into a few short cards about that work, schedules them with spaced repetition (FSRS) and serves them to your phone and your desktop. It runs on your machine, writes the cards with the agent you already use, and keeps your code local.
 
 **Status:** v1, for Claude Code and Codex. macOS and Linux are tested; Windows should work and is untested.
 
@@ -30,11 +30,11 @@ ownship uninstall   # remove the hooks and stop the daemon; --purge also deletes
 
 ## How it works
 
-1. When your agent finishes a turn, ownship reads that turn from the agent's own session log (your prompt and the agent's visible messages) and takes a snapshot of your working tree with git to get the diff. Your git index, stash and branches are never touched.
+1. When your agent finishes a turn, ownship reads that turn from the agent's own session log (your prompt and the agent's visible messages) and takes a snapshot of your working tree with git to get the diff. It never touches your git index, stash or branches.
 2. It asks your own agent, in non-interactive mode and with no tools, for 0 to 3 cards about the turn: why a decision was made, a multiple-choice question, a short answer or a number.
-3. Every card must quote the turn; a card whose quotes are not in the turn is thrown away.
+3. Every card must quote the turn, and ownship throws away any card whose quotes are not in it.
 4. You review on your phone or at `http://127.0.0.1:47821`. FSRS brings each card back right before you would forget it. At most 10 new cards a day.
-5. When a card is wrong, say so and write what is actually true. The note is saved in `~/.ownship/knowledge/<repo>/` and shapes the cards that follow.
+5. When a card is wrong, say so and write what is actually true. ownship saves the note in `~/.ownship/knowledge/<repo>/`, and later cards for that repo take it into account.
 
 ## Privacy defaults
 

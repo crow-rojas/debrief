@@ -1,10 +1,10 @@
 {
   "cli": {
     "usage": "Usage: ownship init | open | status | pair | config [key value] | start | stop | uninstall [--purge]",
-    "nodeTooOld": "ownship needs Node {required} or newer; this is Node {current}. Upgrade Node and run init again.",
-    "noAgents": "Neither claude nor codex is on PATH. Install one of them; ownship generates cards with it.",
+    "nodeTooOld": "ownship needs Node {required} or newer, and this machine has Node {current}. Upgrade Node and run init again.",
+    "noAgents": "Neither claude nor codex is on PATH. Install one of them: ownship writes the cards with it.",
     "agentsFound": "Found: {agents}.",
-    "hooksQuestion": "Install a Stop hook so ownship hears about each finished turn right away? [Y/n] ",
+    "hooksQuestion": "Install a Stop hook so ownship knows right away when each turn ends? [Y/n] ",
     "hookAdded": "Added the Stop hook to {file}.",
     "hookPresent": "The Stop hook is already in {file}.",
     "codexTrust": "Codex runs a new hook only after you trust it: open Codex, run /hooks and approve the ownship hook.",
@@ -34,7 +34,7 @@
     "statusHooks": "Hooks: Claude Code {claude}, Codex {codex}",
     "hookYes": "installed",
     "hookNo": "not installed",
-    "tailscaleServeFailed": "Tailscale could not serve ownship yet: {reason}"
+    "tailscaleServeFailed": "Tailscale cannot serve ownship yet: {reason}"
   },
   "app": {
     "loading": "Loading cards…",
