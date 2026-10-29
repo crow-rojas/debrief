@@ -46,6 +46,21 @@ OWNSHIP_HOME=$(mktemp -d) CLAUDE_CONFIG_DIR=$(mktemp -d) CODEX_HOME=$(mktemp -d)
 
 Changes to the harness itself (`bin/`, `lefthook.yml`, `.claude/`, `.codex/`, the workflows, and the linter, type and test configs) fail `bin/guard.mjs` until the maintainer reviews them and adds a `Guard-Override:` trailer. Say why in the description.
 
+## Releasing
+
+Maintainers only. Bump `version` in `package.json` and move the `CHANGELOG.md` entries under the new version in one `chore: release X.Y.Z` pull request. Once it is merged, tag `main` and push the tag:
+
+```sh
+git tag vX.Y.Z && git push origin vX.Y.Z
+```
+
+The [release workflow](.github/workflows/release.yml) runs `bin/ci` and stages the version on npm through trusted publishing, with provenance and no token. It goes public once a maintainer approves it with 2FA:
+
+```sh
+npx npm@11.21.1 stage list ownship
+npx npm@11.21.1 stage approve <stage-id>
+```
+
 ## Reporting a bug
 
 Open an issue with what you expected, what happened, the steps to reproduce it, your OS, `node -v`, the agent and its version (`claude --version` or `codex --version`), and the output of `ownship status`. Relevant lines from `~/.ownship/capture.log` and `~/.ownship/daemon.log` help, with any private code removed.
