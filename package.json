@@ -1,6 +1,6 @@
 {
   "name": "ownship",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Understand what your coding agent ships under your name.",
   "license": "Apache-2.0",
   "type": "module",
