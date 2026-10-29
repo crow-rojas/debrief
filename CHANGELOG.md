@@ -4,6 +4,13 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-29
+
+### Changed
+
+- Releases are staged on npm from GitHub Actions through trusted publishing, with provenance, and go public after a maintainer approves them.
+- The README says what generation costs, where to look when something fails and how to contribute.
+
 ### Fixed
 
 - Running `ownship init` again after an update or from another install replaces ownship's old Stop hook instead of adding a second one next to it.
@@ -17,5 +24,6 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 - `ownship open`, `pair`, `status`, `config`, `start`, `stop` and `uninstall [--purge]`.
 - A public [roadmap](ROADMAP.md), a contributing guide, a code of conduct and a security policy.
 
-[Unreleased]: https://github.com/crow-rojas/ownship/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/crow-rojas/ownship/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/crow-rojas/ownship/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/crow-rojas/ownship/releases/tag/v0.1.0

@@ -1,6 +1,6 @@
 {
   "name": "ownship",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Understand what your coding agent ships under your name: spaced-repetition cards from its real work, on your phone and desktop, local-first.",
   "license": "Apache-2.0",
   "type": "module",
