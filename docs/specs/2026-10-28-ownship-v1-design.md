@@ -41,7 +41,7 @@ These would make ownship a failure even if it technically works:
 - Node with the built-in `node:sqlite` is the minimum runtime. No native modules, so installs never compile. The exact minimum Node version and the stability level of `node:sqlite` are pinned in `docs/research/versions.md` with sources.
 - Runs on macOS, Linux and Windows. **(builder's call)** v1 is tested on macOS and Linux; Windows has no native dependency and should work, and is listed as untested until someone runs it.
 - Everything in the repo is in English. The UI is in English and Spanish from day one (no literal UI copy; ADR to follow the starter's ADR-004). Cards are written by the LLM in the language the user configures.
-- The repo GitHub name moves from `crow-rojas/debrief` to `crow-rojas/ownship` (the owner does the rename; GitHub redirects the old URL).
+- The repository is `crow-rojas/ownship` on GitHub.
 
 ## How it works
 
