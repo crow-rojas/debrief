@@ -10,6 +10,7 @@ export type FilteredTurn = {
   changes: Change[]
   dropped: { path: string; reason: "ignored" | "lockfile" | "generated" | "secret" }[]
   truncated: boolean
+  omitted: number
 }
 
 const LOCKFILES = new Set([
@@ -70,10 +71,13 @@ function withoutSecrets(patch: string): { patch: string | null; removed: boolean
   return { patch: kept.length ? header + kept.join("") : null, removed: true }
 }
 
-// Cuts the largest patches first until the total fits the budget.
-function truncate(changes: Change[], budget: number): boolean {
+// Cuts the largest patches first, then leaves out whole files from the end until the total fits.
+function fit(
+  changes: Change[],
+  budget: number,
+): { changes: Change[]; truncated: boolean; omitted: number } {
   let total = changes.reduce((sum, c) => sum + c.patch.length, 0)
-  if (total <= budget) return false
+  if (total <= budget) return { changes, truncated: false, omitted: 0 }
   for (const change of [...changes].sort((a, b) => b.patch.length - a.patch.length)) {
     if (total <= budget) break
     const keep = Math.max(200, change.patch.length - (total - budget) - MARKER.length)
@@ -82,8 +86,14 @@ function truncate(changes: Change[], budget: number): boolean {
     change.patch = change.patch.slice(0, keep) + MARKER
     total += change.patch.length
   }
-  return true
+  const kept = [...changes]
+  while (total > budget && kept.length > 0) total -= kept.pop()!.patch.length
+  return { changes: kept, truncated: true, omitted: changes.length - kept.length }
 }
+
+const TEXT_BUDGET = 10_000
+const cap = (text: string) =>
+  text.length > TEXT_BUDGET ? text.slice(0, TEXT_BUDGET) + MARKER : text
 
 const clean = (text: string) =>
   text
@@ -109,11 +119,13 @@ export async function filterTurn(turn: TurnEvent, budgetChars = 60_000): Promise
       if (patch !== null) changes.push({ ...change, patch })
     }
   }
-  return {
-    prompt: clean(turn.prompt),
-    messages: turn.messages.map(clean).filter(Boolean),
-    changes,
-    dropped,
-    truncated: truncate(changes, budgetChars),
+  // The messages share one budget, newest kept first: the end of a turn says what was done.
+  const messages: string[] = []
+  let room = TEXT_BUDGET
+  for (const message of turn.messages.map(clean).filter(Boolean).reverse()) {
+    if (room <= 0) break
+    messages.unshift(message.length > room ? message.slice(-room) : message)
+    room -= message.length
   }
+  return { prompt: cap(clean(turn.prompt)), messages, dropped, ...fit(changes, budgetChars) }
 }

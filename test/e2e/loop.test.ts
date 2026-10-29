@@ -26,7 +26,7 @@ function sessionLines(cwd: string): string {
     ...base,
     type: "assistant",
     uuid: "e2e-a1",
-    timestamp: new Date(now - 1000).toISOString(),
+    timestamp: new Date(now).toISOString(),
     message: {
       role: "assistant",
       content: [{ type: "text", text: "Added the check to save()." }],

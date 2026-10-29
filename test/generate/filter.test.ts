@@ -101,6 +101,28 @@ describe("filterTurn", () => {
     expect(out.messages).toEqual(["ok"])
   })
 
+  it("keeps a turn of 3,000 small files within the budget by omitting files", async () => {
+    const repo = makeRepo()
+    const changes = Array.from({ length: 3000 }, (_, i) =>
+      change(
+        `vendor/lib${i}.js`,
+        patch(`vendor/lib${i}.js`, [`export const value${i} = ${i} // padding padding`]),
+      ),
+    )
+    const out = await filterTurn(event(repo, changes))
+    expect(out.changes.reduce((sum, c) => sum + c.patch.length, 0)).toBeLessThanOrEqual(60_000)
+    expect(out.omitted).toBeGreaterThan(0)
+    expect(out.changes.length + out.omitted).toBe(3000)
+    expect(out.truncated).toBe(true)
+  })
+
+  it("caps a huge prompt and huge messages", async () => {
+    const repo = makeRepo()
+    const out = await filterTurn(event(repo, [], "x".repeat(100_000), ["y".repeat(100_000)]))
+    expect(out.prompt.length).toBeLessThanOrEqual(10_100)
+    expect(out.messages.join("").length).toBeLessThanOrEqual(10_100)
+  })
+
   it("truncates a 5,000-line diff to the budget and sets truncated", async () => {
     const repo = makeRepo()
     const lines = Array.from(

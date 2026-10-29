@@ -31,20 +31,35 @@ describe("pipeline", () => {
     expect(await runPipelineOnce(db, config, NOW)).toBe("idle")
   })
 
-  it("a generator failure keeps the turn queued with the error, and the third failure marks it failed", async () => {
+  it("an outage (missing, logged out, timeout) keeps the turn queued without spending attempts", async () => {
     const db = openDb()
     const id = insertTurn(db, new Date(NOW.getTime() - 60_000).toISOString(), makeRepo())
     const run = async () => {
       throw new GeneratorError("timeout", "too slow")
     }
     const config = { ...loadConfig(), generator: fake }
-    expect(await runPipelineOnce(db, config, NOW, { run })).toBe("failed")
+    for (let i = 0; i < 4; i++)
+      expect(await runPipelineOnce(db, config, NOW, { run })).toBe("failed")
     expect(
       db.prepare("SELECT state, attempts, last_error FROM turns WHERE id = ?").get(id),
     ).toEqual({
       state: "queued",
-      attempts: 1,
+      attempts: 0,
       last_error: "timeout: too slow",
+    })
+  })
+
+  it("invalid output spends attempts, and the third marks the turn failed", async () => {
+    const db = openDb()
+    const id = insertTurn(db, new Date(NOW.getTime() - 60_000).toISOString(), makeRepo())
+    const run = async () => {
+      throw new GeneratorError("invalid", "not JSON")
+    }
+    const config = { ...loadConfig(), generator: fake }
+    await runPipelineOnce(db, config, NOW, { run })
+    expect(db.prepare("SELECT state, attempts FROM turns WHERE id = ?").get(id)).toEqual({
+      state: "queued",
+      attempts: 1,
     })
     await runPipelineOnce(db, config, NOW, { run })
     await runPipelineOnce(db, config, NOW, { run })
