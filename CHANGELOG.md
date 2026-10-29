@@ -4,6 +4,10 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 
 ## [Unreleased]
 
+### Fixed
+
+- After an update, the next ownship command or agent turn restarts a daemon older than the installed version instead of reusing it.
+
 ## [0.1.1] - 2026-10-29
 
 ### Changed
