@@ -85,6 +85,14 @@
       "regenerate": "Regenerar con mi nota",
       "cancel": "Cancelar"
     },
-    "saveFailed": "No pude guardar tu respuesta. Verifica que el daemon de ownship esté en ejecución y vuelve a responder."
+    "saveFailed": "No pude guardar tu respuesta. Verifica que el daemon de ownship esté en ejecución y vuelve a responder.",
+    "end": {
+      "title": "Repasaste {n} tarjeta | Repasaste {n} tarjetas",
+      "right": "{n} bien a la primera",
+      "again": "{n} vuelve pronto | {n} vuelven pronto",
+      "stillDue": "No queda nada pendiente | Queda 1 tarjeta pendiente | Quedan {n} tarjetas pendientes",
+      "continue": "Repasar {n} más",
+      "home": "Inicio"
+    }
   }
 }
