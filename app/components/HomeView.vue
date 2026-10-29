@@ -4,17 +4,30 @@ import { useI18n } from "vue-i18n"
 import { ago } from "../ago.ts"
 import { getHome, NotPairedError, type HomeSummary } from "../api.ts"
 import { repoName } from "../repo.ts"
+import { skippedIn } from "../skipped.ts"
 import EmptyState from "./EmptyState.vue"
 
 const { t, locale } = useI18n()
-const home = ref<HomeSummary | null>(null)
+const summary = ref<HomeSummary | null>(null)
+// "Not now" cards stay due on the server; the home leaves them out, as the session does.
+const home = computed(
+  () =>
+    summary.value && {
+      ...summary.value,
+      due: Math.max(0, summary.value.due - skippedIn()),
+      repos: summary.value.repos.map((r) => ({
+        ...r,
+        due: Math.max(0, r.due - skippedIn(r.slug)),
+      })),
+    },
+)
 const state = ref<"loading" | "ready" | "unpaired" | "error">("loading")
 // A session holds up to 5 cards, like SessionView.
 const first = computed(() => Math.min(5, home.value?.due ?? 0))
 
 onMounted(async () => {
   try {
-    home.value = await getHome()
+    summary.value = await getHome()
     state.value = "ready"
   } catch (error) {
     state.value = error instanceof NotPairedError ? "unpaired" : "error"

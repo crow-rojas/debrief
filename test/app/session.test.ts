@@ -171,9 +171,40 @@ describe("SessionView", () => {
     expect(wrapper.find("[data-test=session-end]").exists()).toBe(true)
   })
 
-  it("an empty session goes home", async () => {
+  it("an empty session goes home without a history entry", async () => {
     api.getSession.mockResolvedValue([])
+    const before = history.length
     await mountSession()
     expect(location.hash).toBe("#/")
+    expect(history.length).toBe(before)
+  })
+
+  it("the end screen's home button replaces the session in history", async () => {
+    api.getSession.mockResolvedValue([choice(1)])
+    const wrapper = await mountSession()
+    await answerCurrent(wrapper)
+    const before = history.length
+    await wrapper.find("[data-test=home]").trigger("click")
+    expect(location.hash).toBe("#/")
+    expect(history.length).toBe(before)
+  })
+
+  it("an unknown still-due count offers no next session and claims nothing", async () => {
+    api.getSession.mockResolvedValue([choice(1)])
+    api.getHome.mockRejectedValue(new Error("offline"))
+    const wrapper = await mountSession()
+    await answerCurrent(wrapper)
+    const end = wrapper.find("[data-test=session-end]")
+    expect(end.exists()).toBe(true)
+    expect(end.text()).not.toContain("Nothing else is due")
+    expect(wrapper.find("[data-test=continue]").exists()).toBe(false)
+  })
+
+  it("shows loading, not a blank screen, while the end screen waits", async () => {
+    api.getSession.mockResolvedValue([choice(1)])
+    api.answer.mockReturnValue(new Promise(() => {}))
+    const wrapper = await mountSession()
+    await answerCurrent(wrapper)
+    expect(wrapper.text()).toContain("Loading")
   })
 })

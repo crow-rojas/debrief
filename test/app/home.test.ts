@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { NotPairedError } from "../../app/api.ts"
 import HomeView from "../../app/components/HomeView.vue"
 import { makeI18n } from "../../app/i18n/index.ts"
+import { skipped } from "../../app/skipped.ts"
 
 const api = vi.hoisted(() => ({ getHome: vi.fn() }))
 vi.mock("../../app/api.ts", () => ({ ...api, NotPairedError: class extends Error {} }))
@@ -20,7 +21,10 @@ const hrefs = (wrapper: Awaited<ReturnType<typeof mountHome>>) =>
   wrapper.findAll("a").map((a) => a.attributes("href"))
 
 describe("HomeView", () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    skipped.clear()
+  })
 
   it("shows what is due and links to a session", async () => {
     api.getHome.mockResolvedValue({
@@ -90,5 +94,37 @@ describe("HomeView", () => {
     api.getHome.mockRejectedValue(new Error("offline"))
     const wrapper = await mountHome()
     expect(wrapper.text()).toContain("Couldn't load cards")
+  })
+
+  it("leaves out cards skipped this visit", async () => {
+    skipped.set(1, "api-1234abcd")
+    skipped.set(2, "api-1234abcd")
+    api.getHome.mockResolvedValue({
+      due: 3,
+      nextDueAt: null,
+      repos: [
+        { slug: "api-1234abcd", due: 2, lastTurnAt: ago(-5) },
+        { slug: "web-87654321", due: 1, lastTurnAt: ago(-60) },
+      ],
+      notes: 0,
+    })
+    const wrapper = await mountHome()
+    expect(wrapper.text()).toContain("1 card to review")
+    expect(hrefs(wrapper)).not.toContain("#/session?repo=api-1234abcd")
+    expect(hrefs(wrapper)).toContain("#/session?repo=web-87654321")
+    expect(wrapper.text()).toContain("Nothing due")
+  })
+
+  it("is caught up when every due card was skipped", async () => {
+    skipped.set(1, "api-1234abcd")
+    api.getHome.mockResolvedValue({
+      due: 1,
+      nextDueAt: null,
+      repos: [{ slug: "api-1234abcd", due: 1, lastTurnAt: ago(-5) }],
+      notes: 0,
+    })
+    const wrapper = await mountHome()
+    expect(wrapper.text()).toContain("You're all caught up")
+    expect(hrefs(wrapper)).not.toContain("#/session")
   })
 })
