@@ -28,7 +28,7 @@ ownship turns what a coding agent just did into short review cards about that wo
 2. **No literal user-facing copy** (ADR-008). It goes in `app/i18n/en.json` and `es.json` together; a test fails when their keys differ.
 3. **Conventional Commits**, one concern each, with no AI co-author trailers (the `commit-msg` hook rejects both).
 4. **Never silence a check.** No `eslint-disable`, `@ts-ignore`, `@ts-expect-error` or `@ts-nocheck` (ESLint rejects them), no `--no-verify`, no new ignores in `eslint.config.js`, `.prettierignore` or `pnpm-workspace.yaml`. Fix the cause.
-5. **Never delete, skip or loosen a test to get green** (`bin/guard.mjs`). The same goes for the harness (`bin/`, `lefthook.yml`, `.claude/`, `.codex/`, `.github/`, linter, type and test configs, the `package.json` scripts). The `Guard-Override:` trailer is for humans only.
+5. **Never delete, skip or loosen a test to get green** (`bin/guard.mjs`). The same goes for the harness (`bin/`, `lefthook.yml`, `.claude/`, `.codex/`, `.github/workflows/`, `.github/rulesets/`, linter, type and test configs, the `package.json` scripts). The `Guard-Override:` trailer is for humans only.
 6. **Write the failing test first**, and run it to see it fail for the right reason.
 7. **Never put private code in fixtures.** Record agent sessions in a throwaway repo with toy content (see `test/fixtures/README.md`).
 8. **Never touch the user's git index, stash, branches or working tree, and never read agent auth files** (spec, Constraints). Snapshots use a temporary index.
