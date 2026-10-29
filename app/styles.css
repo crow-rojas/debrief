@@ -411,6 +411,33 @@ a.home-row .home-row-name {
   color: var(--muted);
 }
 
+.notes h1 {
+  margin: 8px 4px 16px;
+  font-size: 20px;
+}
+
+.back {
+  display: inline-block;
+  padding: 4px;
+  text-decoration: none;
+}
+
+.note {
+  margin-bottom: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.note .home-row-meta {
+  margin: 0 0 6px;
+}
+
+.note-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;

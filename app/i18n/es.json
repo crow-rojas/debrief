@@ -103,6 +103,11 @@
       "notes": "Notas",
       "notesCount": "Sin notas todavía | {n} nota | {n} notas",
       "next": "La próxima tarjeta llega {when}."
+    },
+    "notes": {
+      "title": "Notas",
+      "empty": "Todavía no hay notas. Cuando marcas una tarjeta como incorrecta y dices qué es lo cierto, la nota queda aquí.",
+      "back": "Volver"
     }
   }
 }
