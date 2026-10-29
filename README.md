@@ -12,12 +12,20 @@ While your agent works, ownship turns what it just did into a few short cards ab
 npx ownship init
 ```
 
-`init` needs Node 22.15 or newer and `claude` or `codex` on your PATH. It offers to add a Stop hook to `~/.claude/settings.json` and `~/.codex/hooks.json` (it backs each file up first), starts the local daemon and prints a link for this computer. Codex runs a new hook only after you approve it with `/hooks`.
+`init` needs Node 22.15 or newer and `claude` or `codex` on your PATH. In one step it:
+
+- picks English or Spanish from your locale (change it with `ownship config language es`),
+- adds a Stop hook to `~/.claude/settings.json` and `~/.codex/hooks.json`, after backing each file up (`--no-hooks` skips this; Codex runs a new hook only after you approve it with `/hooks`),
+- starts the local daemon and opens the app in your browser, already paired (`--no-open` skips that),
+- and, when Tailscale is running, shows a QR for your phone over HTTPS. The first time, Tailscale may ask you to enable Serve for your tailnet; `init` prints its link.
 
 ```sh
-ownship pair     # a QR for your phone: Tailscale if you have it, otherwise your local network
-ownship status   # the daemon, the queue, cards due and the last generator error
-ownship start    # start the daemon if it is not running
+ownship open        # open the app, paired, in your browser
+ownship pair        # a QR for your phone: Tailscale if you have it, otherwise your local network
+ownship status      # the daemon, the hooks, the queue, cards due and the last generator error
+ownship config      # show the settings; ownship config <key> <value> to change language, dailyNewCards or port
+ownship stop        # stop the daemon (start brings it back; the hook also starts it on the next turn)
+ownship uninstall   # remove the hooks and stop the daemon; --purge also deletes ~/.ownship
 ```
 
 ## How it works
