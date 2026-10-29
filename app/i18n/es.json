@@ -93,6 +93,16 @@
       "stillDue": "No queda nada pendiente | Queda 1 tarjeta pendiente | Quedan {n} tarjetas pendientes",
       "continue": "Repasar {n} más",
       "home": "Inicio"
+    },
+    "home": {
+      "due": "{n} tarjeta para repasar | {n} tarjetas para repasar",
+      "start": "Repasar {n} tarjeta | Repasar {n} tarjetas",
+      "repos": "Repos",
+      "repoDue": "Nada pendiente | {n} pendiente | {n} pendientes",
+      "lastTurn": "{due} · último turno {ago}",
+      "notes": "Notas",
+      "notesCount": "Sin notas todavía | {n} nota | {n} notas",
+      "next": "La próxima tarjeta llega {when}."
     }
   }
 }

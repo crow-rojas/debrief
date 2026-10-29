@@ -161,7 +161,8 @@ textarea {
   resize: vertical;
 }
 
-button {
+button,
+.button {
   font: inherit;
   cursor: pointer;
   border-radius: 12px;
@@ -178,6 +179,7 @@ button:disabled {
 }
 
 button:focus-visible,
+a:focus-visible,
 textarea:focus-visible,
 input:focus-visible {
   outline: 2px solid var(--accent);
@@ -359,6 +361,54 @@ input:focus-visible {
 
 .end button + button {
   margin-top: 8px;
+}
+
+.button {
+  display: block;
+  margin-top: 20px;
+  text-decoration: none;
+}
+
+.home-label {
+  margin: 24px 4px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.rows + .home-row {
+  margin-top: 24px;
+}
+
+a.home-row .home-row-name {
+  color: var(--accent);
+}
+
+.home-row-name {
+  font-weight: 600;
+}
+
+.home-row-meta {
+  font-size: 14px;
+  color: var(--muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

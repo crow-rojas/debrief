@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import type { FlagInput, SessionCard } from "../api.ts"
+import { ago as since } from "../ago.ts"
 import { repoName } from "../repo.ts"
 import FlagSheet from "./FlagSheet.vue"
 
@@ -10,13 +11,7 @@ const emit = defineEmits<{ notNow: []; flag: [input: FlagInput] }>()
 const { t, locale } = useI18n()
 const flagging = ref(false)
 
-const ago = computed(() => {
-  const minutes = Math.round((new Date(props.card.endedAt).getTime() - Date.now()) / 60_000)
-  const format = new Intl.RelativeTimeFormat(locale.value, { numeric: "auto" })
-  if (Math.abs(minutes) < 60) return format.format(minutes, "minute")
-  if (Math.abs(minutes) < 60 * 24) return format.format(Math.round(minutes / 60), "hour")
-  return format.format(Math.round(minutes / 1440), "day")
-})
+const ago = computed(() => since(props.card.endedAt, locale.value))
 const repo = computed(() => repoName(props.card.repo))
 const code = computed(() => props.card.evidence.filter((e) => e.source === "patch"))
 const quotes = computed(() => props.card.evidence.filter((e) => e.source !== "patch"))
