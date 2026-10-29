@@ -2,6 +2,7 @@
 import { computed, ref } from "vue"
 import { useI18n } from "vue-i18n"
 import type { FlagInput, SessionCard } from "../api.ts"
+import { repoName } from "../repo.ts"
 import FlagSheet from "./FlagSheet.vue"
 
 const props = defineProps<{ card: SessionCard; position: number; total: number }>()
@@ -16,7 +17,7 @@ const ago = computed(() => {
   if (Math.abs(minutes) < 60 * 24) return format.format(Math.round(minutes / 60), "hour")
   return format.format(Math.round(minutes / 1440), "day")
 })
-const repo = computed(() => props.card.repo.replace(/-[0-9a-f]{8}$/, ""))
+const repo = computed(() => repoName(props.card.repo))
 const code = computed(() => props.card.evidence.filter((e) => e.source === "patch"))
 const quotes = computed(() => props.card.evidence.filter((e) => e.source !== "patch"))
 const kind = computed(() => {
