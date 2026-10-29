@@ -50,8 +50,6 @@ export async function startDaemon(): Promise<void> {
     }
   }
 
-  await catchUp(db, READERS, new Date())
-  const stopWatching = watch(db, READERS, { onStored: () => void pump() })
   const server = createServer(db, config, {
     token,
     staticDir: staticDir(),
@@ -73,7 +71,10 @@ export async function startDaemon(): Promise<void> {
     server.once("error", reject)
     server.listen(config.port, config.lan ? "0.0.0.0" : "127.0.0.1", resolve)
   })
+  // Bound first: a second daemon fails on the port before it reads any log.
   writeFileSync(homePath("daemon.json"), JSON.stringify({ pid: process.pid, port: config.port }))
+  await catchUp(db, READERS, new Date())
+  const stopWatching = watch(db, READERS, { onStored: () => void pump() })
   log(`listening on ${config.lan ? "0.0.0.0" : "127.0.0.1"}:${config.port}`)
   void pump()
 

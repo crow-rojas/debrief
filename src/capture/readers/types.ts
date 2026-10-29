@@ -15,6 +15,8 @@ export interface Reader {
   root(): string
   files(): Promise<string[]>
   read(file: string, offset: number): Promise<ReadResult>
+  // Whether a file under root() is a log this reader handles; the watcher skips the rest.
+  owns?(file: string): boolean
 }
 
 export type Line = { text: string; start: number; end: number }

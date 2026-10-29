@@ -1,4 +1,4 @@
-import { appendFileSync, mkdtempSync, statSync, writeFileSync } from "node:fs"
+import { appendFileSync, chmodSync, mkdirSync, mkdtempSync, statSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { beforeEach, describe, expect, it } from "vitest"
@@ -79,6 +79,52 @@ describe("capture", () => {
     expect(second?.slug).toMatch(/-[0-9a-f]{8}$/)
   })
 
+  it("concurrent reads of one worktree never count the same change twice", async () => {
+    const db = openDb()
+    const repo = makeRepo({ "a.py": "1\n" })
+    writeFiles(repo, { "a.py": "2\n" })
+    const [one, two] = [logFile(), logFile()]
+    append(one, turn(repo, "s1-t1", 5, { sessionId: "s1" }))
+    append(two, turn(repo, "s2-t1", 4, { sessionId: "s2" }))
+    await Promise.all([
+      processFile(db, fakeReader(), one, NOW),
+      processFile(db, fakeReader(), two, NOW),
+      processFile(db, fakeReader(), one, NOW),
+    ])
+    const rows = db.prepare("SELECT event_json FROM turns WHERE state = 'queued'").all() as {
+      event_json: string
+    }[]
+    expect(rows).toHaveLength(2)
+    const changed = rows.flatMap(
+      (r) => (JSON.parse(r.event_json) as { changes: unknown[] }).changes,
+    )
+    expect(changed).toHaveLength(1)
+  })
+
+  it("a turn whose snapshot fails is stored as failed and capture goes on", async () => {
+    const db = openDb()
+    const repo = makeRepo({ "a.py": "1\n" })
+    writeFiles(repo, { "secret.pem": "x\n" })
+    chmodSync(join(repo, "secret.pem"), 0o000)
+    const file = logFile()
+    append(file, turn(repo, "t1", 10))
+    try {
+      expect(await processFile(db, fakeReader(), file, NOW)).toBe(0)
+    } finally {
+      chmodSync(join(repo, "secret.pem"), 0o644)
+    }
+    expect(
+      db
+        .prepare("SELECT state, last_error IS NOT NULL AS err FROM turns WHERE turn_id = 't1'")
+        .get(),
+    ).toEqual({
+      state: "failed",
+      err: 1,
+    })
+    append(file, turn(repo, "t2", 5))
+    expect(await processFile(db, fakeReader(), file, NOW)).toBe(1)
+  })
+
   it("missed turns of one worktree merge into one event", async () => {
     const db = openDb()
     const repo = makeRepo({ "a.py": "1\n" })
@@ -145,9 +191,47 @@ describe("capture", () => {
     const reader = { ...fakeReader(), files: async () => [file] }
     await catchUp(db, [reader], NOW)
     expect(count(db)).toBe(0)
-    append(file, turn(repo, "new", 10))
-    await catchUp(db, [reader], NOW)
+    const later = new Date(NOW.getTime() + 60_000)
+    append(file, turn(repo, "new", -30))
+    await catchUp(db, [reader], later)
     expect(count(db)).toBe(1)
+  })
+
+  it("turns that ended before install are never captured, even from a file first seen later", async () => {
+    const db = openDb()
+    const repo = makeRepo({ "a.py": "1\n" })
+    const file = logFile()
+    const reader = { ...fakeReader(), files: async () => [] as string[] }
+    await catchUp(db, [reader], NOW)
+    append(file, turn(repo, "compressed-history", 3600))
+    append(
+      file,
+      turn(repo, "after-install", 0, {
+        ts: { start: NOW.toISOString(), end: new Date(NOW.getTime() + 1000).toISOString() },
+      }),
+    )
+    expect(await processFile(db, reader, file, new Date(NOW.getTime() + 2000))).toBe(1)
+    expect(db.prepare("SELECT turn_id FROM turns").all()).toEqual([{ turn_id: "after-install" }])
+  })
+
+  it("watch ignores files the reader does not own", async () => {
+    const db = openDb()
+    const repo = makeRepo({ "a.py": "1\n" })
+    const root = mkdtempSync(join(tmpdir(), "root-"))
+    const reader = { ...fakeReader(root), owns: (file: string) => !file.includes("/subagents/") }
+    const stop = watch(db, [reader], { debounceMs: 50 })
+    try {
+      const now = new Date().toISOString()
+      mkdirSync(join(root, "s", "subagents"), { recursive: true })
+      append(
+        join(root, "s", "subagents", "a.jsonl"),
+        turn(repo, "sub", 0, { ts: { start: now, end: now } }),
+      )
+      await new Promise((r) => setTimeout(r, 400))
+      expect(count(db)).toBe(0)
+    } finally {
+      stop()
+    }
   })
 
   it("watch stores a turn written to a log under the reader's root", async () => {

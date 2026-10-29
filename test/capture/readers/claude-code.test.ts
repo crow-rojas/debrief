@@ -61,6 +61,26 @@ describe("Claude Code reader", () => {
     expect(rest.offset).toBe(statSync(file).size)
   })
 
+  it("ignores subagent (sidechain) records", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "reader-"))
+    const file = join(dir, "s.jsonl")
+    const sidechain = readFileSync(session, "utf8")
+      .trim()
+      .split("\n")
+      .map((line) => JSON.stringify({ ...JSON.parse(line), isSidechain: true }))
+      .join("\n")
+    writeFileSync(file, `${sidechain}\n`)
+    expect((await claudeCodeReader.read(file, 0)).turns).toEqual([])
+  })
+
+  it("owns session logs only, not subagent logs", () => {
+    const root = claudeCodeReader.root()
+    expect(claudeCodeReader.owns?.(join(root, "proj", "s.jsonl"))).toBe(true)
+    expect(claudeCodeReader.owns?.(join(root, "proj", "s", "subagents", "agent-1.jsonl"))).toBe(
+      false,
+    )
+  })
+
   it("skips an unknown format version instead of guessing", async () => {
     const result = await claudeCodeReader.read(join(FIXTURES, "future-version.jsonl"), 0)
     expect(result.turns).toEqual([])

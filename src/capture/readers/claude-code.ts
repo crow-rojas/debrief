@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises"
 import { homedir } from "node:os"
-import { join } from "node:path"
+import { join, relative, sep } from "node:path"
 import type { RawTurn } from "../event.ts"
 import { readLines, type ReadResult, type Reader } from "./types.ts"
 
@@ -20,6 +20,7 @@ type Entry = {
   version?: string
   entrypoint?: string
   isMeta?: boolean
+  isSidechain?: boolean
   isApiErrorMessage?: boolean
   message?: { content?: string | Block[]; stop_reason?: string }
 }
@@ -69,6 +70,8 @@ async function read(file: string, offset: number): Promise<ReadResult> {
       return { turns: [], offset: end, skipped }
     }
 
+    // Subagent records belong to their own logs; their edits reach the parent turn through git.
+    if (entry.isSidechain) continue
     if (entry.type === "user" && !entry.isMeta) {
       const raw = text(entry.message?.content)
       if (raw === null) continue
@@ -124,4 +127,10 @@ async function files(): Promise<string[]> {
   return found.flat()
 }
 
-export const claudeCodeReader: Reader = { id: "claude-code", version: 1, root, files, read }
+// <root>/<project>/<session>.jsonl only; subagents write to <session>/subagents/*.jsonl.
+function owns(file: string): boolean {
+  const rel = relative(root(), file)
+  return rel.endsWith(".jsonl") && rel.split(sep).length === 2
+}
+
+export const claudeCodeReader: Reader = { id: "claude-code", version: 1, root, files, read, owns }
