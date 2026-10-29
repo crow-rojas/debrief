@@ -93,6 +93,16 @@
       "stillDue": "Nothing else is due | 1 card still due | {n} cards still due",
       "continue": "Review {n} more",
       "home": "Home"
+    },
+    "home": {
+      "due": "{n} card to review | {n} cards to review",
+      "start": "Review {n} card | Review {n} cards",
+      "repos": "Repos",
+      "repoDue": "Nothing due | {n} due | {n} due",
+      "lastTurn": "{due} · last turn {ago}",
+      "notes": "Notes",
+      "notesCount": "No notes yet | {n} note | {n} notes",
+      "next": "The next card is due {when}."
     }
   }
 }
