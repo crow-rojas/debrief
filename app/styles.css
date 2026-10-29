@@ -347,6 +347,20 @@ input:focus-visible {
   color: var(--muted);
 }
 
+.end p + p {
+  margin-top: 4px;
+}
+
+.end button {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.end button + button {
+  margin-top: 8px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   button {
     transition: none;

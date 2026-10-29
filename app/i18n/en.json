@@ -85,6 +85,14 @@
       "regenerate": "Regenerate with my note",
       "cancel": "Cancel"
     },
-    "saveFailed": "Couldn't save your answer. Check that the ownship daemon is running and answer again."
+    "saveFailed": "Couldn't save your answer. Check that the ownship daemon is running and answer again.",
+    "end": {
+      "title": "You reviewed {n} card | You reviewed {n} cards",
+      "right": "{n} right the first time",
+      "again": "{n} comes back soon | {n} come back soon",
+      "stillDue": "Nothing else is due | 1 card still due | {n} cards still due",
+      "continue": "Review {n} more",
+      "home": "Home"
+    }
   }
 }
