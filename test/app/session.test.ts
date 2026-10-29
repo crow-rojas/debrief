@@ -54,6 +54,16 @@ describe("SessionView", () => {
     expect(wrapper.text()).toContain("Question 2?")
   })
 
+  it("keeps Not now and the flag in the top bar, and opens the flag form above the question", async () => {
+    const wrapper = await mountSession()
+    const top = wrapper.find("header")
+    expect(top.find("[data-test=not-now]").exists()).toBe(true)
+    expect(top.find("[data-test=flag]").attributes("aria-label")).toBe("This card is wrong")
+    await top.find("[data-test=flag]").trigger("click")
+    const html = wrapper.html()
+    expect(html.indexOf('data-test="flag-note"')).toBeLessThan(html.indexOf("Question 1?"))
+  })
+
   it("flagging with a note calls flag with action regenerate", async () => {
     const wrapper = await mountSession()
     await wrapper.find("[data-test=flag]").trigger("click")

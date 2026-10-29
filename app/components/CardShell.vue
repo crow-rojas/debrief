@@ -37,8 +37,27 @@ const kind = computed(() => {
   <article class="card">
     <header class="card-top">
       <span>{{ t("app.card.meta", { repo, ago }) }}</span>
-      <span>{{ t("app.progress", { n: position, total }) }}</span>
+      <span class="card-actions">
+        <span>{{ t("app.progress", { n: position, total }) }}</span>
+        <button type="button" class="link" data-test="not-now" @click="emit('notNow')">
+          {{ t("app.card.notNow") }}
+        </button>
+        <button
+          type="button"
+          class="link danger flag"
+          data-test="flag"
+          :aria-label="t('app.card.wrong')"
+          :title="t('app.card.wrong')"
+          :aria-expanded="flagging"
+          @click="flagging = !flagging"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M5 21V4h11l-1.5 4L16 12H7v9z" fill="currentColor" />
+          </svg>
+        </button>
+      </span>
     </header>
+    <FlagSheet v-if="flagging" @cancel="flagging = false" @submit="emit('flag', $event)" />
     <p class="kind">{{ kind }}</p>
     <h1 class="question">{{ card.question }}</h1>
     <figure v-for="(e, i) in code" :key="`c${i}`" class="evidence">
@@ -52,14 +71,5 @@ const kind = computed(() => {
       {{ e.quote }}
     </blockquote>
     <slot />
-    <FlagSheet v-if="flagging" @cancel="flagging = false" @submit="emit('flag', $event)" />
-    <footer v-else class="card-actions">
-      <button type="button" class="link danger" data-test="flag" @click="flagging = true">
-        {{ t("app.card.wrong") }}
-      </button>
-      <button type="button" class="link" data-test="not-now" @click="emit('notNow')">
-        {{ t("app.card.notNow") }}
-      </button>
-    </footer>
   </article>
 </template>
