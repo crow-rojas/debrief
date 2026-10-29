@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process"
-import { existsSync, readFileSync } from "node:fs"
+import { existsSync, readFileSync, rmSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { loadConfig } from "../config.ts"
 import { homePath } from "../paths.ts"
@@ -55,4 +55,21 @@ export async function ensureDaemon(): Promise<{ port: number }> {
     await new Promise((r) => setTimeout(r, 100))
   }
   throw new Error(`the ownship daemon did not start on port ${port}; see ${homePath("daemon.log")}`)
+}
+
+// Stops the daemon only when an ownship daemon answers on the recorded port, so a stale
+// daemon.json whose pid now belongs to another process never gets that process killed.
+export async function stopDaemon(): Promise<boolean> {
+  const info = daemonInfo()
+  if (!info) return false
+  if (!(await healthy(info.port))) {
+    rmSync(homePath("daemon.json"), { force: true })
+    return false
+  }
+  process.kill(info.pid)
+  for (let waited = 0; waited < 3000 && (await healthy(info.port)); waited += 100) {
+    await new Promise((r) => setTimeout(r, 100))
+  }
+  rmSync(homePath("daemon.json"), { force: true })
+  return true
 }

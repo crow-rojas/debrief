@@ -1,6 +1,6 @@
 {
   "cli": {
-    "usage": "Usage: ownship init | start | status | pair",
+    "usage": "Usage: ownship init | open | status | pair | config [key value] | start | stop | uninstall [--purge]",
     "nodeTooOld": "ownship needs Node {required} or newer; this is Node {current}. Upgrade Node and run init again.",
     "noAgents": "Neither claude nor codex is on PATH. Install one of them; ownship generates cards with it.",
     "agentsFound": "Found: {agents}.",
@@ -9,7 +9,7 @@
     "hookPresent": "The Stop hook is already in {file}.",
     "codexTrust": "Codex runs a new hook only after you trust it: open Codex, run /hooks and approve the ownship hook.",
     "started": "The ownship daemon is running on port {port}.",
-    "openDesktop": "Open {url} on this computer. Run ownship pair to use your phone.",
+    "openDesktop": "Open {url} on this computer.",
     "statusDaemon": "Daemon: {state}",
     "statusRunning": "running on port {port}",
     "statusStopped": "not running",
@@ -20,7 +20,21 @@
     "pairLan": "Pairing over your local network.",
     "lanWarning": "This uses plain HTTP: anyone on the same network can read your cards. Use it only on networks you trust, or install Tailscale.",
     "noNetwork": "No Tailscale and no local network address found, so there is nothing to pair over.",
-    "scan": "Scan this code with your phone, or open the link:"
+    "scan": "Scan this code with your phone, or open the link:",
+    "phoneTailscale": "On your phone, scan this code (HTTPS over Tailscale):",
+    "phoneHint": "To review on your phone, run ownship pair.",
+    "hookRemoved": "Removed the Stop hook from {file}.",
+    "stopped": "Stopped the ownship daemon.",
+    "notRunning": "The ownship daemon was not running.",
+    "purged": "Deleted {dir}.",
+    "dataKept": "Your cards and notes stay in {dir}. Run ownship uninstall --purge to delete them too.",
+    "configInvalid": "That value is not valid for {key}.",
+    "configUnknown": "Unknown setting {key}. You can set: {keys}.",
+    "configSet": "{key} is now {value}.",
+    "statusHooks": "Hooks: Claude Code {claude}, Codex {codex}",
+    "hookYes": "installed",
+    "hookNo": "not installed",
+    "tailscaleServeFailed": "Tailscale could not serve ownship yet: {reason}"
   },
   "app": {
     "loading": "Loading cards…",

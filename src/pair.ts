@@ -50,7 +50,14 @@ export const systemProbe: PairingProbe = {
     }
     return null
   },
+  // --yes never prompts; the timeout covers a tailnet where Serve still has to be enabled, where
+  // the command prints an approval link and waits.
   async serve(port) {
-    await run("tailscale", ["serve", "--bg", String(port)])
+    try {
+      await run("tailscale", ["serve", "--yes", "--bg", String(port)], { timeout: 15_000 })
+    } catch (error) {
+      const { stdout = "", stderr = "" } = error as { stdout?: string; stderr?: string }
+      throw new Error(`${stdout}${stderr}`.trim() || (error as Error).message, { cause: error })
+    }
   },
 }

@@ -1,6 +1,6 @@
 {
   "cli": {
-    "usage": "Uso: ownship init | start | status | pair",
+    "usage": "Uso: ownship init | open | status | pair | config [clave valor] | start | stop | uninstall [--purge]",
     "nodeTooOld": "ownship necesita Node {required} o más nuevo; este es Node {current}. Actualiza Node y vuelve a correr init.",
     "noAgents": "No encontré claude ni codex en el PATH. Instala alguno; ownship genera las tarjetas con él.",
     "agentsFound": "Encontré: {agents}.",
@@ -9,7 +9,7 @@
     "hookPresent": "El hook Stop ya está en {file}.",
     "codexTrust": "Codex corre un hook nuevo solo después de que confías en él: abre Codex, corre /hooks y aprueba el hook de ownship.",
     "started": "El daemon de ownship está corriendo en el puerto {port}.",
-    "openDesktop": "Abre {url} en este computador. Corre ownship pair para usar tu teléfono.",
+    "openDesktop": "Abre {url} en este computador.",
     "statusDaemon": "Daemon: {state}",
     "statusRunning": "corriendo en el puerto {port}",
     "statusStopped": "detenido",
@@ -20,7 +20,21 @@
     "pairLan": "Emparejando por tu red local.",
     "lanWarning": "Esto usa HTTP sin cifrar: cualquiera en la misma red puede leer tus tarjetas. Úsalo solo en redes de confianza, o instala Tailscale.",
     "noNetwork": "No encontré Tailscale ni una dirección de red local, así que no hay por dónde emparejar.",
-    "scan": "Escanea este código con tu teléfono, o abre el enlace:"
+    "scan": "Escanea este código con tu teléfono, o abre el enlace:",
+    "phoneTailscale": "En tu teléfono, escanea este código (HTTPS por Tailscale):",
+    "phoneHint": "Para repasar en tu teléfono, corre ownship pair.",
+    "hookRemoved": "Saqué el hook Stop de {file}.",
+    "stopped": "Detuve el daemon de ownship.",
+    "notRunning": "El daemon de ownship no estaba corriendo.",
+    "purged": "Borré {dir}.",
+    "dataKept": "Tus tarjetas y notas siguen en {dir}. Corre ownship uninstall --purge para borrarlas también.",
+    "configInvalid": "Ese valor no es válido para {key}.",
+    "configUnknown": "No existe el ajuste {key}. Puedes cambiar: {keys}.",
+    "configSet": "{key} quedó en {value}.",
+    "statusHooks": "Hooks: Claude Code {claude}, Codex {codex}",
+    "hookYes": "instalado",
+    "hookNo": "sin instalar",
+    "tailscaleServeFailed": "Tailscale todavía no pudo servir ownship: {reason}"
   },
   "app": {
     "loading": "Cargando tarjetas…",
