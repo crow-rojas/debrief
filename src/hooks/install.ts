@@ -1,5 +1,6 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { dirname } from "node:path"
+import { homedir } from "node:os"
+import { dirname, join } from "node:path"
 
 type Hook = { type: string; command: string; timeout?: number }
 type Group = { matcher?: string; hooks: Hook[] }
@@ -23,6 +24,35 @@ function installStopHook(file: string, command: string): "added" | "present" {
   writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`)
   return "added"
 }
+
+// ownship's own hook commands: this CLI, by absolute path, with the hook subcommand.
+const OURS = /cli\.(js|ts)" hook (claude-code|codex)$/
+const isOurs = (hook: Hook) => OURS.test(hook.command)
+
+function read(file: string): Settings | null {
+  return existsSync(file) ? (JSON.parse(readFileSync(file, "utf8")) as Settings) : null
+}
+
+export function hasStopHook(file: string): boolean {
+  return Boolean(read(file)?.hooks?.Stop?.some((group) => group.hooks?.some(isOurs)))
+}
+
+// Removes ownship's Stop hook and nothing else; a group left empty goes too.
+export function removeStopHook(file: string): "removed" | "absent" {
+  const settings = read(file)
+  if (!settings || !hasStopHook(file)) return "absent"
+  const stop = (settings.hooks?.Stop ?? [])
+    .map((group) => ({ ...group, hooks: group.hooks.filter((hook) => !isOurs(hook)) }))
+    .filter((group) => group.hooks.length > 0)
+  settings.hooks = { ...settings.hooks, Stop: stop }
+  writeFileSync(file, `${JSON.stringify(settings, null, 2)}\n`)
+  return "removed"
+}
+
+export const claudeSettingsPath = () =>
+  join(process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), ".claude"), "settings.json")
+export const codexHooksPath = () =>
+  join(process.env.CODEX_HOME ?? join(homedir(), ".codex"), "hooks.json")
 
 export const installClaudeHook = installStopHook
 export const installCodexHook = installStopHook

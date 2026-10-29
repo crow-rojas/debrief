@@ -9,14 +9,27 @@ import { parseArgs } from "node:util"
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
-  options: { yes: { type: "boolean" }, "no-hooks": { type: "boolean" } },
+  options: {
+    yes: { type: "boolean" },
+    "no-hooks": { type: "boolean" },
+    "no-open": { type: "boolean" },
+    purge: { type: "boolean" },
+  },
 })
-const [command, arg] = positionals
+const [command, arg, value] = positionals
 
 const { loadConfig, saveConfig } = await import("./config.ts")
 const { t } = await import("./messages.ts")
 const lang = loadConfig().language
 const say = (key: string, vars?: Record<string, string | number>) => console.log(t(lang, key, vars))
+
+function printQr(link: string): void {
+  const qrcode = createRequire(import.meta.url)("qrcode-terminal") as {
+    generate(text: string, opts: { small: boolean }, done: (qr: string) => void): void
+  }
+  qrcode.generate(link, { small: true }, (qr) => console.log(qr))
+  console.log(link)
+}
 
 async function askHooks(): Promise<boolean> {
   if (values["no-hooks"]) return false
@@ -38,6 +51,9 @@ async function status(): Promise<void> {
       ? t(lang, "cli.statusRunning", { port: info.port })
       : t(lang, "cli.statusStopped"),
   })
+  const { claudeSettingsPath, codexHooksPath, hasStopHook } = await import("./hooks/install.ts")
+  const state = (file: string) => t(lang, hasStopHook(file) ? "cli.hookYes" : "cli.hookNo")
+  say("cli.statusHooks", { claude: state(claudeSettingsPath()), codex: state(codexHooksPath()) })
   const db = openDb()
   const count = (sql: string, ...args: string[]) =>
     (db.prepare(sql).get(...args) as { n: number }).n
@@ -63,10 +79,17 @@ async function status(): Promise<void> {
 
 async function pair(): Promise<void> {
   const { choosePairing, systemProbe } = await import("./pair.ts")
-  const { daemonInfo, ensureDaemon } = await import("./daemon/lifecycle.ts")
+  const { ensureDaemon, stopDaemon } = await import("./daemon/lifecycle.ts")
   const { ensureToken } = await import("./daemon/token.ts")
   const { port } = await ensureDaemon()
-  const choice = await choosePairing(systemProbe, port)
+  let choice
+  try {
+    choice = await choosePairing(systemProbe, port)
+  } catch (error) {
+    say("cli.tailscaleServeFailed", { reason: (error as Error).message })
+    process.exitCode = 1
+    return
+  }
   if (!choice) {
     say("cli.noNetwork")
     process.exitCode = 1
@@ -75,20 +98,14 @@ async function pair(): Promise<void> {
   if (choice.via === "lan" && !loadConfig().lan) {
     // Restart the daemon so it listens beyond localhost.
     saveConfig({ ...loadConfig(), lan: true })
-    const info = daemonInfo()
-    if (info) process.kill(info.pid)
-    await new Promise((r) => setTimeout(r, 500))
+    await stopDaemon()
     await ensureDaemon()
   }
   say(choice.via === "tailscale" ? "cli.pairTailscale" : "cli.pairLan")
   if (choice.warning) say(choice.warning)
   const link = `${choice.url}/pair?token=${ensureToken()}`
   say("cli.scan")
-  const qrcode = createRequire(import.meta.url)("qrcode-terminal") as {
-    generate(text: string, opts: { small: boolean }, done: (qr: string) => void): void
-  }
-  qrcode.generate(link, { small: true }, (qr) => console.log(qr))
-  console.log(link)
+  printQr(link)
 }
 
 if (command === "daemon") {
@@ -100,12 +117,41 @@ if (command === "daemon") {
   process.exit(0)
 } else if (command === "init") {
   const { init } = await import("./init.ts")
-  const result = await init({ hooks: await askHooks() })
+  const { systemProbe } = await import("./pair.ts")
+  const { openUrl } = await import("./open.ts")
+  const result = await init({
+    hooks: await askHooks(),
+    open: values["no-open"] ? undefined : openUrl,
+    probe: systemProbe,
+    qr: printQr,
+  })
   for (const line of result.lines) console.log(line)
   if (!result.ok) process.exitCode = 1
 } else if (command === "start") {
   const { ensureDaemon } = await import("./daemon/lifecycle.ts")
   say("cli.started", { port: (await ensureDaemon()).port })
+} else if (command === "open") {
+  const { ensureDaemon } = await import("./daemon/lifecycle.ts")
+  const { ensureToken } = await import("./daemon/token.ts")
+  const { openUrl } = await import("./open.ts")
+  const url = `http://127.0.0.1:${(await ensureDaemon()).port}/pair?token=${ensureToken()}`
+  console.log(url)
+  openUrl(url)
+} else if (command === "stop") {
+  const { stopDaemon } = await import("./daemon/lifecycle.ts")
+  say((await stopDaemon()) ? "cli.stopped" : "cli.notRunning")
+} else if (command === "uninstall") {
+  const { uninstall } = await import("./uninstall.ts")
+  for (const line of (await uninstall({ purge: Boolean(values.purge) })).lines) console.log(line)
+} else if (command === "config") {
+  const { SETTING_KEYS, setConfigValue } = await import("./config.ts")
+  if (arg && value !== undefined) {
+    const problem = setConfigValue(arg, value)
+    if (problem) {
+      say(problem, { key: arg, keys: SETTING_KEYS.join(", ") })
+      process.exitCode = 1
+    } else say("cli.configSet", { key: arg, value })
+  } else console.log(JSON.stringify(loadConfig(), null, 2))
 } else if (command === "status") {
   await status()
 } else if (command === "pair") {
