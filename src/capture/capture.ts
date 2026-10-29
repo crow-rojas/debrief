@@ -133,7 +133,23 @@ async function store(db: DatabaseSync, group: RawTurn[], identity: Identity): Pr
   insert(db, last, identity, "queued", event)
 }
 
-export async function processFile(
+// The doorbell, its delayed reread, the watcher and catch-up can all reach the same file at once.
+// One read at a time keeps the dedupe check and the snapshot baseline consistent.
+// ponytail: one lock for the whole daemon; per-worktree locks if capture ever becomes the bottleneck.
+let queue: Promise<unknown> = Promise.resolve()
+
+export function processFile(
+  db: DatabaseSync,
+  reader: Reader,
+  file: string,
+  now: Date,
+): Promise<number> {
+  const run = queue.then(() => processFileNow(db, reader, file, now))
+  queue = run.catch(() => {})
+  return run
+}
+
+async function processFileNow(
   db: DatabaseSync,
   reader: Reader,
   file: string,
@@ -148,9 +164,13 @@ export async function processFile(
   for (const skip of result.skipped) log(`${reader.id} ${file}@${skip.at}: ${skip.reason}`)
 
   const config = loadConfig()
+  const installed = db.prepare("SELECT value FROM meta WHERE key = 'installed_at'").get() as
+    { value: string } | undefined
   const groups: { live: boolean; identity: Identity; turns: RawTurn[] }[] = []
   for (const t of result.turns) {
     if (t.origin !== "interactive" || t.status !== "completed" || known(db, t)) continue
+    // History from before install stays history, wherever it turns up (a rotated or compressed log).
+    if (installed && t.ts.end < installed.value) continue
     const identity = await repoIdentity(t.cwd)
     if (!identity || excluded(identity, config.exclude)) continue
     const live = now.getTime() - new Date(t.ts.end).getTime() <= LIVE_MS
@@ -159,16 +179,38 @@ export async function processFile(
       last.turns.push(t)
     else groups.push({ live, identity, turns: [t] })
   }
-  for (const group of groups) await store(db, group.turns, group.identity)
+  let stored = 0
+  for (const group of groups) {
+    try {
+      await store(db, group.turns, group.identity)
+      stored++
+    } catch (error) {
+      // One bad snapshot (an unreadable file, a diff too big for git) must not stall the session.
+      const message = (error as Error).message.slice(0, 500)
+      log(`${reader.id} ${file}: snapshot failed: ${message}`)
+      for (const t of group.turns) insert(db, t, group.identity, "failed", {})
+      db.prepare(
+        "UPDATE turns SET last_error = ? WHERE agent = ? AND session_id = ? AND turn_id = ?",
+      ).run(
+        message,
+        group.turns[0]!.agent.name,
+        group.turns[0]!.sessionId,
+        group.turns.at(-1)!.turnId,
+      )
+    }
+  }
 
   db.prepare(
     "INSERT OR REPLACE INTO reader_offsets (reader_id, file, offset) VALUES (?, ?, ?)",
   ).run(reader.id, file, result.offset)
-  return groups.length
+  return stored
 }
 
 // On a reader's first run, existing logs are history: start from their end, not their start.
 export async function catchUp(db: DatabaseSync, readers: Reader[], now: Date): Promise<void> {
+  db.prepare("INSERT OR IGNORE INTO meta (key, value) VALUES ('installed_at', ?)").run(
+    now.toISOString(),
+  )
   for (const reader of readers) {
     const files = await reader.files()
     const seen = db
@@ -210,7 +252,7 @@ export function watch(
     }
     watcher.on("change", (_event, name) => {
       const file = join(reader.root(), String(name))
-      if (!/\.jsonl(\.zst)?$/.test(file)) return
+      if (!/\.jsonl(\.zst)?$/.test(file) || reader.owns?.(file) === false) return
       clearTimeout(timers.get(file))
       timers.set(
         file,

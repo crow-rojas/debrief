@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs"
+import { chmodSync, mkdirSync } from "node:fs"
 import { dirname } from "node:path"
 import { DatabaseSync } from "node:sqlite"
 import { homePath } from "./paths.ts"
@@ -33,12 +33,16 @@ const MIGRATIONS = [
      card_id INTEGER NOT NULL REFERENCES cards (id), note TEXT, action TEXT NOT NULL,
      created_at TEXT NOT NULL
    );`,
+  `CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);`,
 ]
 
 export function openDb(file = homePath("ownship.db")): DatabaseSync {
-  mkdirSync(dirname(file), { recursive: true })
+  // The database holds raw diffs and prompts: nobody else on the machine may read it.
+  mkdirSync(dirname(file), { recursive: true, mode: 0o700 })
+  chmodSync(dirname(file), 0o700)
   const db = new DatabaseSync(file)
-  db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;")
+  chmodSync(file, 0o600)
+  db.exec("PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;")
   const { user_version: version } = db.prepare("PRAGMA user_version").get() as {
     user_version: number
   }
