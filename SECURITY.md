@@ -6,7 +6,7 @@ Only the latest release and `main` are supported. Fixes land on `main` and ship 
 
 ## Reporting a vulnerability
 
-Report vulnerabilities privately through GitHub Security Advisories: open the [Security tab](https://github.com/crow-rojas/debrief/security) and click **Report a vulnerability**. Don't open a public issue. You'll get an answer as soon as possible, and credit in the fix if you want it.
+Report vulnerabilities privately through GitHub Security Advisories: open the [Security tab](https://github.com/crow-rojas/ownship/security) and click **Report a vulnerability**. Don't open a public issue. You'll get an answer as soon as possible, and credit in the fix if you want it.
 
 ## Scope
 
