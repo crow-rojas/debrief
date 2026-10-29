@@ -1,7 +1,7 @@
 # ADR-007: Privacy defaults and phone access
 
 - Status: accepted
-- Date: 2026-10-28
+- Date: 2026-10-28, amended 2026-10-29 (knowledge notes on the paired phone)
 - Deciders: owner
 
 ## Context
@@ -10,7 +10,7 @@ ownship handles company code. It must be safe on a work laptop, reachable from t
 
 ## Decision
 
-**What never leaves the machine**: the database, the knowledge notes and the session logs. The phone receives only cards and their snippets, never repo files or transcripts.
+**What never leaves the machine**: the database, the knowledge note files and the session logs. The paired phone receives only cards with their snippets and the text of the knowledge notes, never repo files or transcripts. A note is the user's own correction plus the question and evidence of a card the phone already received, so it adds no code the phone had not seen. It travels over the same token-authenticated channel.
 
 **What reaches an LLM**: only what the user's own agent receives as generator input, filtered as ADR-004 describes. Research mode, off by default and enabled per repo, is the only way the generator reads more. Every repo is captured by default; an `exclude` list in the config leaves repos out.
 
@@ -29,6 +29,8 @@ ownship handles company code. It must be safe on a work laptop, reachable from t
 - Tailscale only: not everyone has it, and the Personal plan is non-commercial (fine for the owner, whose work allows it).
 
 ## Consequences
+
+- The daemon cannot tell the phone from the desktop: both use the same token, and `tailscale serve` traffic arrives from `127.0.0.1`. So anything the app shows on the desktop is also available to the paired phone, and a desktop-only view would need its own token.
 
 - Users without Tailscale get a working but weaker default on untrusted networks, and are told so.
 - Adding notifications later means adding HTTPS on the LAN path or relying on Tailscale.
