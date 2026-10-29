@@ -4,6 +4,10 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 
 ## [Unreleased]
 
+### Changed
+
+- "Not now" and "This card is wrong" sit in the card's top bar, so a long card no longer has to be scrolled to reach them, and the correction form opens right below it.
+
 ### Fixed
 
 - After an update, the next ownship command or agent turn restarts a daemon older than the installed version instead of reusing it.
