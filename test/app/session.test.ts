@@ -47,6 +47,20 @@ describe("SessionView", () => {
     expect(wrapper.text()).toContain("Question 2?")
   })
 
+  it("waits for the last answer to be saved before loading more cards", async () => {
+    api.getSession.mockResolvedValueOnce([choice(1)]).mockResolvedValue([])
+    let save!: (value: unknown) => void
+    api.answer.mockReturnValue(new Promise((resolve) => (save = resolve)))
+    const wrapper = await mountSession()
+    await wrapper.findAll("[data-test=option]")[1]!.trigger("click")
+    await wrapper.find("[data-test=next]").trigger("click")
+    await flushPromises()
+    expect(api.getSession).toHaveBeenCalledTimes(1)
+    save({ rating: "good" })
+    await flushPromises()
+    expect(api.getSession).toHaveBeenCalledTimes(2)
+  })
+
   it('"Not now" removes the card without calling answer', async () => {
     const wrapper = await mountSession()
     await wrapper.find("[data-test=not-now]").trigger("click")

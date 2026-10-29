@@ -10,6 +10,7 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 
 ### Fixed
 
+- Answering the last card of a batch no longer brings it straight back: the app waits for the answer to be saved before loading more cards.
 - After an update, the next ownship command or agent turn restarts a daemon older than the installed version instead of reusing it.
 
 ## [0.1.1] - 2026-10-29
