@@ -4,13 +4,19 @@ Notable changes to ownship. The format is based on [Keep a Changelog](https://ke
 
 ## [Unreleased]
 
+### Added
+
+- A home screen: how many cards are due, a button that starts a session, each repo with its due count and last turn, and the knowledge notes. Tapping a repo starts a session with that repo's cards only.
+- A session has a fixed size and ends with a summary: how many you reviewed, how many were right the first time, how many come back soon and how many are still due, with a button for the next session.
+- The knowledge notes can be read in the app, on every paired device.
+
 ### Changed
 
 - "Not now" and "This card is wrong" sit in the card's top bar, so a long card no longer has to be scrolled to reach them, and the correction form opens right below it.
 
 ### Fixed
 
-- Answering the last card of a batch no longer brings it straight back: the app waits for the answer to be saved before loading more cards.
+- A session no longer loads more cards on its own, so its counter no longer jumps ("9 of 12" to "12 of 14"), "You're all caught up" no longer flashes between batches, and the last card answered no longer comes straight back.
 - After an update, the next ownship command or agent turn restarts a daemon older than the installed version instead of reusing it.
 
 ## [0.1.1] - 2026-10-29

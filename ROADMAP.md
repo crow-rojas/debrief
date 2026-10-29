@@ -10,7 +10,7 @@ What ownship has, what comes next and what is further out. There are no dates: i
 
 ## Now
 
-- **A home and navigation.** Today the app is a single review screen. It needs a start page with what is due, a view per repo, your knowledge notes and a sense of progress.
+- **A sense of progress.** The app now has a home with what is due, sessions per repo and your knowledge notes ([design](docs/specs/2026-10-29-home-and-session-end-design.md)). Views of progress per repo wait until there are weeks of reviews to show.
 - **Design and motion.** A deeper pass on layout, typography and short animations that show what changed. Progress shows mastery (what you can now explain about each repo, retention after a week), not streaks: punishing a missed day is an explicit non-goal ([spec](docs/specs/2026-10-28-ownship-v1-design.md#anti-goals)).
 
 ## Next

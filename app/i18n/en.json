@@ -103,6 +103,11 @@
       "notes": "Notes",
       "notesCount": "No notes yet | {n} note | {n} notes",
       "next": "The next card is due {when}."
+    },
+    "notes": {
+      "title": "Notes",
+      "empty": "No notes yet. When you flag a card as wrong and say what is true, the note lands here.",
+      "back": "Back"
     }
   }
 }

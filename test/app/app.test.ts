@@ -4,6 +4,7 @@ import { nextTick } from "vue"
 import { afterEach, describe, expect, it } from "vitest"
 import App from "../../app/App.vue"
 import HomeView from "../../app/components/HomeView.vue"
+import NotesView from "../../app/components/NotesView.vue"
 import SessionView from "../../app/components/SessionView.vue"
 
 const mountApp = () =>
@@ -29,6 +30,8 @@ describe("App", () => {
     expect(wrapper.findComponent(SessionView).exists()).toBe(false)
     await go("#/session")
     expect(wrapper.findComponent(SessionView).props("repo")).toBeUndefined()
+    await go("#/notes")
+    expect(wrapper.findComponent(NotesView).exists()).toBe(true)
     await go("#/whatever")
     expect(wrapper.findComponent(HomeView).exists()).toBe(true)
   })
