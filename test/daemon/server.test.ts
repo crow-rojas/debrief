@@ -1,5 +1,5 @@
 import { mkdtempSync, writeFileSync } from "node:fs"
-import type { AddressInfo } from "node:net"
+import { connect, type AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
@@ -133,6 +133,19 @@ describe("daemon server", () => {
     })
     expect(withCookie.status).toBe(200)
     expect((await fetch(`${base}/pair?token=wrong`, { redirect: "manual" })).status).toBe(401)
+  })
+
+  it("survives a request with an unparseable URL", async () => {
+    const { port } = new URL(base)
+    await new Promise<void>((resolve) => {
+      const socket = connect(Number(port), "127.0.0.1", () =>
+        socket.end("GET http://[ HTTP/1.1\r\nHost: x\r\n\r\n"),
+      )
+      socket.on("close", () => resolve())
+      socket.on("error", () => resolve())
+      socket.resume()
+    })
+    expect((await fetch(`${base}/api/health`)).status).toBe(200)
   })
 
   it("sends no CORS headers", async () => {

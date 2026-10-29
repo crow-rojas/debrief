@@ -134,7 +134,12 @@ function serveStatic(res: http.ServerResponse, staticDir: string, pathname: stri
 
 export function createServer(db: DatabaseSync, config: Config, opts: Options): http.Server {
   return http.createServer(async (req, res) => {
-    const url = new URL(req.url ?? "/", "http://ownship.local")
+    let url: URL
+    try {
+      url = new URL(req.url ?? "/", "http://ownship.local")
+    } catch {
+      return send(res, 400)
+    }
     res.on("finish", () => {
       try {
         appendFileSync(
