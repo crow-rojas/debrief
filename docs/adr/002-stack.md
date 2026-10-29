@@ -17,10 +17,10 @@ ownship runs on the user's machine and must install with one command, `npx ownsh
 
 ## Alternatives not taken
 
-- **Rails**: every user would need Ruby and Postgres.
-- **A single binary in Go or Bun**: clean to run, but it fights `npx` and needs one build per OS, and `ts-fsrs` would need a port or a bridge.
-- **`better-sqlite3`**: the usual choice, but a native module; when no prebuilt binary matches, `npx` tries to compile it, which fails often on Windows.
-- **Electron or a native mobile app**: one web app covers phone and desktop with no store.
+- Rails: every user would need Ruby and Postgres.
+- A single binary in Go or Bun: clean to run, but it fights `npx` and needs one build per OS, and `ts-fsrs` would need a port or a bridge.
+- `better-sqlite3`: the usual choice, but it is a native module. When no prebuilt binary matches, `npx` tries to compile it, which often fails on Windows.
+- Electron or a native mobile app: one web app covers phone and desktop with no store.
 
 ## Consequences
 

@@ -17,8 +17,8 @@ Business rules are not in any manual. When a card is wrong, the user's correctio
 
 ## Alternatives not taken
 
-- **Notes in SQLite**: faster to query, but opaque to the user and to the generator.
-- **A vector store**: a dependency and a pipeline for a folder that is small for a long time.
+- Notes in SQLite: faster to query, but opaque to the user and to the generator.
+- A vector store: a dependency and a pipeline for a folder that will stay small for a long time.
 
 ## Consequences
 

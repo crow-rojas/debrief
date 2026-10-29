@@ -25,8 +25,8 @@ ownship handles company code. It must be safe on a work laptop, reachable from t
 
 ## Alternatives not taken
 
-- **LAN only**: plain HTTP on a café network exposes snippets and the token.
-- **Tailscale only**: not everyone has it, and the Personal plan is non-commercial (fine for the owner, whose work allows it).
+- LAN only: plain HTTP on a café network exposes snippets and the token.
+- Tailscale only: not everyone has it, and the Personal plan is non-commercial (fine for the owner, whose work allows it).
 
 ## Consequences
 

@@ -20,10 +20,10 @@ ownship needs, for each finished agent turn, what the user asked, what the agent
 
 ## Alternatives not taken
 
-- **Defining a standard for agents to adopt**: no vendor would.
-- **Hooks only**: Claude Code's `Stop` carries no diff, Codex hooks need trust, and a missing hook would lose turns instead of delaying them.
-- **The agent's own patches as the diff**: they miss shell edits and break with each format change.
-- **One agent first**: the owner splits the day between Claude Code and Codex, so one reader would see half the work.
+- Defining a standard for agents to adopt: no vendor would.
+- Hooks only: Claude Code's `Stop` carries no diff, Codex hooks need trust, and a missing hook would lose turns instead of delaying them.
+- The agent's own patches as the diff: they miss shell edits and break with each format change.
+- One agent first: the owner splits the day between Claude Code and Codex, so one reader would see half the work.
 
 ## Consequences
 

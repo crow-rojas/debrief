@@ -10,7 +10,7 @@ The project started as `debrief`. On npm, `debrief` is an unrelated serializatio
 
 ## Decision
 
-The project is **ownship**: own what you ship. In aviation, _ownship_ is the symbol for your own aircraft on a traffic display, knowing where you are among everything else. It fits the tagline, "Understand what your coding agent ships under your name".
+The project is **ownship**: own what you ship. In aviation, _ownship_ is the symbol for your own aircraft on a traffic display: where you are among everything else. It fits the tagline, "Understand what your coding agent ships under your name".
 
 - npm package `ownship` (unscoped, free on 2026-10-28), command `ownship`, installed with `npx ownship init`.
 - GitHub repo `crow-rojas/ownship`, renamed from `crow-rojas/debrief` by the owner; GitHub redirects the old URL.
