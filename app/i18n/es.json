@@ -70,6 +70,7 @@
       "discard": "Descartar",
       "regenerate": "Regenerar con mi nota",
       "cancel": "Cancelar"
-    }
+    },
+    "saveFailed": "No pude guardar tu respuesta. Revisa que el daemon de ownship esté corriendo y vuelve a responder."
   }
 }

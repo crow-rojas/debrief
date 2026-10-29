@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type Component } from "vue"
+import { useI18n } from "vue-i18n"
 import type { Answer } from "../../src/cards/grade.ts"
 import {
   answer,
@@ -23,7 +24,9 @@ const KINDS: Record<SessionCard["kind"], Component> = {
   number: NumberCard,
 }
 
+const { t } = useI18n()
 const cards = ref<SessionCard[]>([])
+const saveFailed = ref(false)
 const done = ref(0)
 const state = ref<"loading" | "ready" | "unpaired" | "error">("loading")
 // "Not now" only hides a card for this visit; it stays due on the server.
@@ -51,8 +54,15 @@ async function onDone(given: Answer) {
   advance()
   try {
     await answer(card.id, given)
+    saveFailed.value = false
   } catch (error) {
     if (error instanceof NotPairedError) state.value = "unpaired"
+    else {
+      // Put the card back so the answer can be given again once the daemon is reachable.
+      cards.value = [card, ...cards.value.filter((c) => c.id !== card.id)]
+      done.value--
+      saveFailed.value = true
+    }
   }
 }
 
@@ -72,6 +82,9 @@ onMounted(load)
 </script>
 
 <template>
+  <p v-if="saveFailed" class="banner" role="alert" data-test="save-failed">
+    {{ t("app.saveFailed") }}
+  </p>
   <EmptyState v-if="state !== 'ready' || !current" :variant="state === 'ready' ? 'empty' : state" />
   <CardShell
     v-else
