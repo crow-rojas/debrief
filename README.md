@@ -31,7 +31,7 @@ ownship uninstall   # remove the hooks and stop the daemon; --purge also deletes
 ## How it works
 
 1. When your agent finishes a turn, ownship reads that turn from the agent's own session log (your prompt and the agent's visible messages) and takes a snapshot of your working tree with git to get the diff. It never touches your git index, stash or branches.
-2. It asks your own agent, in non-interactive mode and with no tools, for 0 to 3 cards about the turn: why a decision was made, a multiple-choice question, a short answer or a number.
+2. It asks your own agent, in non-interactive mode and with no tools, for 0 to 3 cards about the turn: why a decision was made, a multiple-choice question, a short answer or a number. This runs under your agent's own login, so it uses your subscription or API quota, and it stops for the day at the daily cap of new cards.
 3. Every card must quote the turn, and ownship throws away any card whose quotes are not in it.
 4. You review on your phone or at `http://127.0.0.1:47821`. FSRS brings each card back right before you would forget it. At most 10 new cards a day.
 5. When a card is wrong, say so and write what is actually true. ownship saves the note in `~/.ownship/knowledge/<repo>/`, and later cards for that repo take it into account.
@@ -47,11 +47,18 @@ ownship uninstall   # remove the hooks and stop the daemon; --purge also deletes
 
 `~/.ownship/config.json`: `language` (`en` or `es`), `dailyNewCards`, `port`, `generator` (`"auto"` or your own command), `repos` (`{ "<repo>": { "research": true } }`) and `exclude` (repos never captured).
 
+## Something wrong?
+
+Start with `ownship status`: it shows the daemon, the hooks, the queue and the last generator error. `~/.ownship/capture.log` records the turns that capture skipped or failed on, and `~/.ownship/daemon.log` what the daemon did. After updating ownship, run `ownship init` again so the hooks point at the new version. If none of that explains it, [report a bug](https://github.com/crow-rojas/ownship/issues/new?template=bug_report.yml).
+
 ## Docs
 
-- [Roadmap](ROADMAP.md)
-- [v1 design](docs/specs/2026-10-28-ownship-v1-design.md) and [decisions](docs/adr/)
-- [Research behind the idea](docs/research/learning-while-agents-code.md) ([original in Spanish](docs/research/learning-while-agents-code.es.md)) and the [agent capture survey](docs/research/agent-capture-survey.md)
+- **Using ownship:** the [roadmap](ROADMAP.md) and the [changelog](CHANGELOG.md).
+- **How it was designed:** the [v1 design](docs/specs/2026-10-28-ownship-v1-design.md), the [decisions](docs/adr/), the [research behind the idea](docs/research/learning-while-agents-code.md) ([original in Spanish](docs/research/learning-while-agents-code.es.md)) and the [agent capture survey](docs/research/agent-capture-survey.md).
+
+## Contributing
+
+Bug reports, fixes and new agent readers are welcome: [CONTRIBUTING.md](CONTRIBUTING.md) explains the setup and the checks. Report vulnerabilities privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## License
 
