@@ -2,11 +2,16 @@
 import { computed } from "vue"
 import { useI18n } from "vue-i18n"
 
-const props = defineProps<{ reviewed: number; right: number; again: number; stillDue: number }>()
+const props = defineProps<{
+  reviewed: number
+  right: number
+  again: number
+  stillDue: number | null
+}>()
 const emit = defineEmits<{ continue: []; home: [] }>()
 const { t } = useI18n()
 // The next session holds up to 5 cards, like SessionView.
-const next = computed(() => Math.min(5, props.stillDue))
+const next = computed(() => Math.min(5, props.stillDue ?? 0))
 </script>
 
 <template>
@@ -14,9 +19,9 @@ const next = computed(() => Math.min(5, props.stillDue))
     <h1>{{ t("app.end.title", { n: reviewed }, reviewed) }}</h1>
     <p>{{ t("app.end.right", { n: right }) }}</p>
     <p>{{ t("app.end.again", { n: again }, again) }}</p>
-    <p>{{ t("app.end.stillDue", { n: stillDue }, stillDue) }}</p>
+    <p v-if="stillDue !== null">{{ t("app.end.stillDue", { n: stillDue }, stillDue) }}</p>
     <button
-      v-if="stillDue > 0"
+      v-if="next > 0"
       type="button"
       class="primary"
       data-test="continue"

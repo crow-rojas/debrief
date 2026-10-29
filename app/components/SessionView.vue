@@ -11,7 +11,7 @@ import {
   type FlagInput,
   type SessionCard,
 } from "../api.ts"
-import { skipped } from "../skipped.ts"
+import { skipped, skippedIn } from "../skipped.ts"
 import CardShell from "./CardShell.vue"
 import EmptyState from "./EmptyState.vue"
 import ChoiceCard from "./kinds/ChoiceCard.vue"
@@ -36,7 +36,9 @@ const done = ref(0)
 const total = ref(0)
 const right = ref(0)
 const again = ref(0)
+// null while unknown: the end screen then claims nothing about what is left.
 const stillDue = ref<number | null>(null)
+const ended = ref(false)
 const state = ref<"loading" | "ready" | "unpaired" | "error">("loading")
 // Answers and flags still on their way: the end screen waits for them, so a failed save can
 // put its card back first and "still due" never counts a card that was just answered.
@@ -47,6 +49,7 @@ const current = computed(() => cards.value[0])
 async function start() {
   state.value = "loading"
   stillDue.value = null
+  ended.value = saveFailed.value = false
   done.value = right.value = again.value = 0
   try {
     const fetched = await getSession(SIZE + skipped.size, props.repo)
@@ -63,19 +66,23 @@ async function start() {
 async function finish() {
   while (saving.size > 0) await Promise.allSettled([...saving])
   if (cards.value.length > 0 || state.value !== "ready") return
-  let due = 0
   try {
     const summary = await getHome()
-    due = props.repo ? (summary.repos.find((r) => r.slug === props.repo)?.due ?? 0) : summary.due
+    const due = props.repo
+      ? (summary.repos.find((r) => r.slug === props.repo)?.due ?? 0)
+      : summary.due
+    stillDue.value = Math.max(0, due - skippedIn(props.repo))
   } catch {
     // The answers are saved; without the summary, the end screen just offers no next session.
   }
-  const hidden = [...skipped.values()].filter((slug) => !props.repo || slug === props.repo)
-  stillDue.value = Math.max(0, due - hidden.length)
+  ended.value = true
 }
 
+// Replace, not push: back from home must not land on a session that bounces or restarts.
+// replaceState fires no hashchange, so App is told by hand.
 function goHome() {
-  location.hash = "#/"
+  history.replaceState(history.state, "", "#/")
+  window.dispatchEvent(new HashChangeEvent("hashchange"))
 }
 
 function advance() {
@@ -143,7 +150,7 @@ onMounted(start)
     <component :is="KINDS[current.kind]" :card="current" @done="onDone" />
   </CardShell>
   <SessionEnd
-    v-else-if="stillDue !== null"
+    v-else-if="ended"
     :reviewed="right + again"
     :right="right"
     :again="again"
@@ -151,4 +158,5 @@ onMounted(start)
     @continue="start"
     @home="goHome"
   />
+  <EmptyState v-else variant="loading" />
 </template>
