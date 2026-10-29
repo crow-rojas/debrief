@@ -2,6 +2,14 @@ import type { Answer } from "../src/cards/grade.ts"
 import type { CardDraft } from "../src/cards/types.ts"
 
 export type SessionCard = CardDraft & { id: number; repo: string; endedAt: string }
+// Mirrors of src/daemon/server.ts and src/knowledge/notes.ts, which import node: modules.
+export type HomeSummary = {
+  due: number
+  nextDueAt: string | null
+  repos: { slug: string; due: number; lastTurnAt: string }[]
+  notes: number
+}
+export type Note = { slug: string; file: string; text: string }
 export type FlagInput = { note?: string; action: "discard" | "regenerate" }
 
 export class NotPairedError extends Error {}
@@ -26,9 +34,18 @@ export async function getLanguage(): Promise<"en" | "es" | null> {
   }
 }
 
-export async function getSession(limit = 5): Promise<SessionCard[]> {
-  const res = await call(`/api/session?limit=${limit}`)
+export async function getSession(limit = 5, repo?: string): Promise<SessionCard[]> {
+  const scope = repo === undefined ? "" : `&repo=${encodeURIComponent(repo)}`
+  const res = await call(`/api/session?limit=${limit}${scope}`)
   return ((await res.json()) as { cards: SessionCard[] }).cards
+}
+
+export async function getHome(): Promise<HomeSummary> {
+  return (await (await call("/api/home")).json()) as HomeSummary
+}
+
+export async function getNotes(): Promise<Note[]> {
+  return ((await (await call("/api/notes")).json()) as { notes: Note[] }).notes
 }
 
 // crypto.randomUUID exists only in secure contexts, and LAN pairing is plain HTTP.
